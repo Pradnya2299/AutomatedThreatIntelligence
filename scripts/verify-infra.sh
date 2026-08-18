@@ -25,8 +25,9 @@ redis-cli -h "${REDIS_HOST:-localhost}" -p "${REDIS_PORT:-6379}" ping
 
 echo "== Kafka topics =="
 list_topics() {
-  docker compose -f "${ROOT}/docker-compose.yml" exec -T kafka \
-    /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list
+  # Quote the Kafka path so Git Bash (MSYS) does not rewrite /opt/... to C:/Program Files/Git/opt/...
+  MSYS_NO_PATHCONV=1 docker compose -f "${ROOT}/docker-compose.yml" exec -T kafka \
+    bash -c '/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list'
 }
 if docker info >/dev/null 2>&1; then
   list_topics

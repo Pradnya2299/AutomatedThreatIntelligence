@@ -44,6 +44,13 @@ From the repository root:
 cp .env.example .env   # first time only
 chmod +x infrastructure/kafka/create-topics.sh scripts/*.sh
 docker compose up -d
+docker compose run --rm kafka-init
+```
+
+On **Git Bash for Windows**, do not pass `/opt/...` as a raw `docker exec` argument. MSYS rewrites it to `C:/Program Files/Git/opt/...`. List topics like this:
+
+```bash
+docker compose exec kafka bash -c '/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list'
 ```
 
 Services:

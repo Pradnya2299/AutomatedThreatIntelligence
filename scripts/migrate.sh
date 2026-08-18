@@ -9,12 +9,13 @@ if [[ -f "${ROOT}/.env" ]]; then
   set +a
 fi
 
-# Host networking so this works the same way as Spring Boot on the developer machine.
+# Reach published Postgres from a Flyway container on Linux, macOS, and Docker Desktop (Windows).
+# Do not use --network host: it does not expose Windows localhost to Linux containers.
 docker run --rm \
-  --network host \
+  --add-host=host.docker.internal:host-gateway \
   -v "${ROOT}/database/migrations:/flyway/sql:ro" \
   flyway/flyway:10 \
-  -url="jdbc:postgresql://127.0.0.1:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-threat_advisor}" \
+  -url="jdbc:postgresql://host.docker.internal:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-threat_advisor}" \
   -user="${POSTGRES_USER:-threat_advisor}" \
   -password="${POSTGRES_PASSWORD:-threat_advisor_dev_change_me}" \
   -connectRetries=10 \

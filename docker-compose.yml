@@ -86,7 +86,11 @@ services:
         condition: service_healthy
     volumes:
       - ./infrastructure/kafka/create-topics.sh:/create-topics.sh:ro
-    entrypoint: ["/bin/bash", "/create-topics.sh"]
+    # Strip CR so Git-for-Windows checkouts (CRLF) still run inside Linux.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - sed 's/\r$//' /create-topics.sh > /tmp/create-topics.sh && exec bash /tmp/create-topics.sh
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks:
