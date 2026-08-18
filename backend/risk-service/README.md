@@ -1,21 +1,14 @@
 # risk-service
 
-Deterministic risk engine (formula in later phases).
+Deterministic finding risk engine (Phase 2D). Formula is documented in [docs/risk/phase-2d.md](../../docs/risk/phase-2d.md).
 
 ## Run
-
-Infrastructure must be up (`docker compose up -d` from repo root).
 
 ```bash
 cd backend
 ./mvnw -pl risk-service spring-boot:run
 ```
 
-Health: http://localhost:8083/api/health  
-Actuator: http://localhost:8083/actuator/health
+Health: http://localhost:8083/api/health
 
-## Package layout
-
-`com.threatadvisor.risk` — controller, config, dto, exception, plus empty service/domain/repository/kafka packages for later phases.
-
-Do not put business logic in controllers or Kafka consumers.
+Internal: `POST /internal/risk/run/{findingId}`

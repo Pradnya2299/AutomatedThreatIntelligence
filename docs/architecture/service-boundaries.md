@@ -38,9 +38,9 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 **Owns:** deterministic risk engine, `risk_assessments`, publish `risk.calculated`.
 
-**Does:** configurable weighted formula (documented in database design / later engine docs). Never delegates scoring to an LLM.
+**Does:** weighted formula in [phase-2d.md](../risk/phase-2d.md). Consumes `finding.created`. Never delegates scoring to an LLM.
 
-**Does not:** mutate assets; generate patch prose.
+**Does not:** mutate assets; generate patch prose; expose dashboard REST.
 
 **Scale driver:** finding volume.
 

@@ -99,12 +99,25 @@ Published by correlation-service after a finding is inserted or updated. IDs plu
 
 ### risk.calculated
 
+Published by risk-service after upserting `risk_assessments`.
+
 ```json
 {
   "riskAssessmentId": "uuid",
   "findingId": "uuid",
-  "finalRiskScore": 94,
-  "riskLevel": "CRITICAL"
+  "vulnerabilityId": "uuid",
+  "assetId": "uuid",
+  "cveId": "CVE-2021-44228",
+  "riskScore": 97.50,
+  "riskLevel": "CRITICAL",
+  "factors": {
+    "cvss": 100,
+    "assetCriticality": 100,
+    "internetExposure": 100,
+    "exploitability": 75,
+    "activeExploitation": 100
+  },
+  "explanation": "Risk is CRITICAL (97.50) because ..."
 }
 ```
 

@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2C** adds deterministic CVE-to-asset correlation. Risk, RAG, and OpenAI are **not** implemented yet.
+This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2D** adds a deterministic risk engine. RAG and OpenAI are **not** implemented yet.
 
 ## Current phase
 
-**Phase 2C — Asset/vulnerability correlation.** See [docs/correlation/phase-2c.md](docs/correlation/phase-2c.md).
+**Phase 2D — Deterministic risk scoring.** See [docs/risk/phase-2d.md](docs/risk/phase-2d.md).
 
 ## Repository layout
 
@@ -127,12 +127,15 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 - [Database design](docs/database/database-design.md)
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
+- [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 2D risk](docs/risk/phase-2d.md)
 - [Phase 2C correlation](docs/correlation/phase-2c.md)
 - [Phase 2B ingestion](docs/ingestion/phase-2b.md)
+- [ADRs](docs/decisions/)
 
 ## Next phase (recommended)
 
-**Phase 2D** should implement **deterministic risk scoring** on `finding.created` — still without OpenAI or RAG.
+**Phase 3** should add **api-service REST + React dashboard** over findings and risk — still without OpenAI unless a later AI phase.
 
 ## License
 

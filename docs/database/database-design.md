@@ -57,29 +57,23 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 
 `knowledge_chunks.embedding` is `vector(1536)` for planned model **text-embedding-3-small**. Embeddings are not populated in Phase 2A.
 
-## Risk formula (documented now, implemented later)
+## Risk formula (Phase 2D, `formula_version=v1`)
 
-Configurable weights (defaults):
+See [phase-2d.md](../risk/phase-2d.md). Implemented in risk-service (no LLM):
 
 ```
-technical_risk      = f(cvss, CWE class)                          # 0–100
-exploitability      = f(exploit_available, active_exploitation)    # 0–100
-exposure            = f(internet_facing, environment)              # 0–100
-asset_criticality   = mapped from asset.business_criticality       # 0–100
-business_impact     = f(asset_criticality, environment, affected_count)
-
-final_risk = round(
-    0.30 * technical_risk
-  + 0.25 * exploitability
-  + 0.20 * exposure
-  + 0.15 * business_impact
-  + 0.10 * asset_criticality
-)
+riskScore = round(
+    0.40 * cvss               # CVSS base * 10
+  + 0.25 * assetCriticality   # LOW=25 MEDIUM=50 HIGH=75 CRITICAL=100
+  + 0.15 * internetExposure   # boolean: false=0 true=100
+  + 0.10 * exploitability     # exploit_available: false=0 true=75
+  + 0.10 * activeExploitation # actively_exploited: false=0 true=100
+, 2)
 ```
 
-Levels: `LOW` 0–24, `MEDIUM` 25–49, `HIGH` 50–74, `CRITICAL` 75–100.
+Levels: `LOW` 0–24.99, `MEDIUM` 25–49.99, `HIGH` 50–74.99, `CRITICAL` 75–100.
 
-The LLM must not replace this formula. Reasons stored as JSON (CVSS, KEV, internet-facing, production, criticality).
+Stored on `risk_assessments` (one row per `finding_id`). Reasons JSON holds the generated explanation plus factor breakdown.
 
 ## JSON columns
 
