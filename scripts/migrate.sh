@@ -9,13 +9,14 @@ if [[ -f "${ROOT}/.env" ]]; then
   set +a
 fi
 
-# Reach published Postgres from a Flyway container on Linux, macOS, and Docker Desktop (Windows).
-# Do not use --network host: it does not expose Windows localhost to Linux containers.
-docker run --rm \
-  --add-host=host.docker.internal:host-gateway \
+# Join the Compose network and talk to service name "postgres".
+# This works on Docker Desktop (Windows/macOS) and Linux. Avoid --network host.
+# MSYS_NO_PATHCONV prevents Git Bash from rewriting the Linux mount path.
+MSYS_NO_PATHCONV=1 docker run --rm \
+  --network threat-advisor \
   -v "${ROOT}/database/migrations:/flyway/sql:ro" \
   flyway/flyway:10 \
-  -url="jdbc:postgresql://host.docker.internal:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-threat_advisor}" \
+  -url="jdbc:postgresql://postgres:5432/${POSTGRES_DB:-threat_advisor}" \
   -user="${POSTGRES_USER:-threat_advisor}" \
   -password="${POSTGRES_PASSWORD:-threat_advisor_dev_change_me}" \
   -connectRetries=10 \
