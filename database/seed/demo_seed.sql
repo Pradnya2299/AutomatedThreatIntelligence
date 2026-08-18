@@ -56,7 +56,9 @@ INSERT INTO assets (id, organization_id, hostname, ip_address, operating_system,
     ('c0000000-0000-0000-0000-000000000017', '11111111-1111-1111-1111-111111111111', 'nw-prod-k8s-02', '10.0.5.11', 'Linux', 'Ubuntu 22.04', 'x86_64', 'PRODUCTION', 'platform', 'Platform', 'CRITICAL', FALSE, 'ACTIVE', 'us-east-1', '{"role":"k8s-worker"}'),
     ('c0000000-0000-0000-0000-000000000018', '11111111-1111-1111-1111-111111111111', 'nw-int-print-01', '10.0.6.8', 'Windows', 'Server 2016', 'x86_64', 'PRODUCTION', 'it-ops', 'IT', 'LOW', FALSE, 'ACTIVE', 'us-east-1', '{"role":"print"}'),
     ('c0000000-0000-0000-0000-000000000019', '11111111-1111-1111-1111-111111111111', 'nw-prod-edge-gw-01', '10.0.1.8', 'Linux', 'RHEL 9', 'x86_64', 'PRODUCTION', 'app-team', 'Payments', 'CRITICAL', TRUE, 'ACTIVE', 'us-east-1', '{"role":"internet-java-gateway"}'),
-    ('c0000000-0000-0000-0000-00000000001a', '11111111-1111-1111-1111-111111111111', 'nw-prod-mysql-01', '10.0.3.60', 'Linux', 'Ubuntu 22.04', 'x86_64', 'PRODUCTION', 'dba', 'Data', 'HIGH', FALSE, 'ACTIVE', 'us-east-1', '{"role":"mysql"}')
+    ('c0000000-0000-0000-0000-00000000001a', '11111111-1111-1111-1111-111111111111', 'nw-prod-mysql-01', '10.0.3.60', 'Linux', 'Ubuntu 22.04', 'x86_64', 'PRODUCTION', 'dba', 'Data', 'HIGH', FALSE, 'ACTIVE', 'us-east-1', '{"role":"mysql"}'),
+    ('c0000000-0000-0000-0000-00000000001b', '11111111-1111-1111-1111-111111111111', 'nw-prod-httpd-old-01', '10.0.1.40', 'Linux', 'Ubuntu 22.04', 'x86_64', 'PRODUCTION', 'web-team', 'Digital', 'MEDIUM', TRUE, 'ACTIVE', 'us-east-1', '{"role":"httpd-below-range"}'),
+    ('c0000000-0000-0000-0000-00000000001c', '11111111-1111-1111-1111-111111111111', 'nw-prod-httpd-vuln-01', '10.0.1.41', 'Linux', 'Ubuntu 22.04', 'x86_64', 'PRODUCTION', 'web-team', 'Digital', 'HIGH', TRUE, 'ACTIVE', 'us-east-1', '{"role":"httpd-in-range"}')
 ON CONFLICT (organization_id, hostname) DO NOTHING;
 
 INSERT INTO asset_software (id, asset_id, vendor, product, version, cpe, installation_status) VALUES
@@ -87,7 +89,9 @@ INSERT INTO asset_software (id, asset_id, vendor, product, version, cpe, install
     ('d0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000019', 'vmware', 'spring_boot', '3.1.2', 'cpe:2.3:a:vmware:spring_boot:3.1.2:*:*:*:*:*:*:*', 'INSTALLED'),
     ('d0000000-0000-0000-0000-00000000001a', 'c0000000-0000-0000-0000-00000000001a', 'oracle', 'mysql', '8.0.34', 'cpe:2.3:a:oracle:mysql:8.0.34:*:*:*:*:*:*:*', 'INSTALLED'),
     ('d0000000-0000-0000-0000-00000000001b', 'c0000000-0000-0000-0000-00000000000c', 'apache', 'http_server', '2.4.57', 'cpe:2.3:a:apache:http_server:2.4.57:*:*:*:*:*:*:*', 'INSTALLED'),
-    ('d0000000-0000-0000-0000-00000000001c', 'c0000000-0000-0000-0000-00000000000f', 'openssl', 'openssl', '3.3.0', 'cpe:2.3:a:openssl:openssl:3.3.0:*:*:*:*:*:*:*', 'INSTALLED')
+    ('d0000000-0000-0000-0000-00000000001c', 'c0000000-0000-0000-0000-00000000000f', 'openssl', 'openssl', '3.3.0', 'cpe:2.3:a:openssl:openssl:3.3.0:*:*:*:*:*:*:*', 'INSTALLED'),
+    ('d0000000-0000-0000-0000-00000000001d', 'c0000000-0000-0000-0000-00000000001b', 'apache', 'http_server', '2.3.9', 'cpe:2.3:a:apache:http_server:2.3.9:*:*:*:*:*:*:*', 'INSTALLED'),
+    ('d0000000-0000-0000-0000-00000000001e', 'c0000000-0000-0000-0000-00000000001c', 'apache', 'http_server', '2.4.49', 'cpe:2.3:a:apache:http_server:2.4.49:*:*:*:*:*:*:*', 'INSTALLED')
 ON CONFLICT (id) DO NOTHING;
 
 -- Scenario A: CRITICAL Log4Shell + internet-facing production + business-critical + vulnerable log4j

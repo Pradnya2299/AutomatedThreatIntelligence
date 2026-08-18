@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Phase 2A: infrastructure foundation only. Does not run CVE correlation, risk, or AI.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @DisabledIfEnvironmentVariable(named = "SKIP_TESTCONTAINERS", matches = "true")
 class InfrastructureFoundationTest {
 

@@ -26,7 +26,9 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 **Owns:** matching enriched CVEs to `asset_software`, creating `findings` with an explainable match reason, publish `finding.created`.
 
-**Does:** vendor/product/CPE/version-range/OS comparison in a domain service (not string-equals-only).
+**Does:** vendor/product/CPE/version-range comparison in a domain service (not string-equals-only). Consumes `cve.normalized`.
+
+**Does not:** score business risk; talk to OpenAI; expose dashboard REST.
 
 **Does not:** score business risk; talk to OpenAI.
 

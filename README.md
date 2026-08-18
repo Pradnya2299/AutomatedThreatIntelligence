@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2B** adds CVE ingestion and normalization. Domain engines (correlation, risk, RAG, OpenAI) are **not** implemented yet.
+This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2C** adds deterministic CVE-to-asset correlation. Risk, RAG, and OpenAI are **not** implemented yet.
 
 ## Current phase
 
-**Phase 2B — CVE ingestion / normalization.** See [docs/ingestion/phase-2b.md](docs/ingestion/phase-2b.md).
+**Phase 2C — Asset/vulnerability correlation.** See [docs/correlation/phase-2c.md](docs/correlation/phase-2c.md).
 
 ## Repository layout
 
@@ -127,12 +127,12 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 - [Database design](docs/database/database-design.md)
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
-- [Event contracts](docs/kafka/event-contracts.md)
-- [ADRs](docs/decisions/)
+- [Phase 2C correlation](docs/correlation/phase-2c.md)
+- [Phase 2B ingestion](docs/ingestion/phase-2b.md)
 
 ## Next phase (recommended)
 
-**Phase 2C** should implement **CPE correlation against seeded assets**, **findings**, and **deterministic risk** — still without OpenAI or RAG.
+**Phase 2D** should implement **deterministic risk scoring** on `finding.created` — still without OpenAI or RAG.
 
 ## License
 

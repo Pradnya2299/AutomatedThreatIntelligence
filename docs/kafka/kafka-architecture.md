@@ -17,8 +17,8 @@ Kafka UI: http://localhost:8088
 | Topic | Producer (intended) | Consumer (intended) |
 |-------|---------------------|---------------------|
 | cve.raw | api-service, future connectors | ingestion-service |
-| cve.normalized | ingestion-service | ingestion-service (enrichment stage) |
-| cve.enriched | ingestion-service | correlation-service |
+| cve.normalized | ingestion-service | correlation-service |
+| cve.enriched | ingestion-service | correlation-service (later; Phase 2C uses cve.normalized) |
 | asset.updated | api-service | correlation-service |
 | finding.created | correlation-service | risk-service |
 | risk.calculated | risk-service | ai-service, notification-service |

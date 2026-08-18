@@ -83,12 +83,17 @@ IDs only so downstream services load the canonical row (avoids duplicating large
 
 ### finding.created
 
+Published by correlation-service after a finding is inserted or updated. IDs plus match metadata for Phase 2D risk — not the full `findings` row.
+
 ```json
 {
   "findingId": "uuid",
-  "assetId": "uuid",
   "vulnerabilityId": "uuid",
-  "cveId": "CVE-2024-12345"
+  "assetId": "uuid",
+  "cveId": "CVE-2024-12345",
+  "matchType": "EXACT_VERSION_MATCH",
+  "matchConfidence": "HIGH",
+  "matchExplanation": "Asset web-prod-01 is affected by CVE-2024-12345 because it runs Apache HTTP Server 2.4.49, which matches the vulnerable CPE cpe:2.3:a:apache:http_server:2.4.49:*:*:*:*:*:*:*."
 }
 ```
 

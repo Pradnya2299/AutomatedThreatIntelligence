@@ -123,8 +123,9 @@ Kafka auto-configuration is enabled on **ingestion-service** for `cve.raw` / `cv
 ## Recommended next phases
 
 1. **Phase 2A:** Docker Compose, Flyway, demo seed (done).
-2. **Phase 2B (this branch):** CVE ingest, normalize, persist, Kafka `cve.raw` / `cve.normalized` (done).
-3. **Phase 2C:** CPE correlation against seeded assets, findings, deterministic risk. Still no OpenAI.
+2. **Phase 2B:** CVE ingest, normalize, persist, Kafka `cve.raw` / `cve.normalized` (done).
+3. **Phase 2C (this branch):** CPE/vendor/product/version correlation, findings, `finding.created` (done).
+4. **Phase 2D:** deterministic risk on findings. Still no OpenAI.
 4. **Phase 3 — API + dashboard:** REST DTOs, authn/z, screens bound to real data.
 5. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval.
 6. **Phase 5 — hardening:** E2E tests, DLQ processors, metrics, images.

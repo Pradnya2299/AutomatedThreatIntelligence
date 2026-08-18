@@ -1,12 +1,10 @@
-# Demo scenarios (seed inventory — findings are produced later)
+# Demo scenarios (seed inventory)
 
-Seed does **not** insert `findings`. It arranges assets, software, and CVE/CPE rows so Phase 2B correlation can demonstrate:
-
-`CVE → matching software → affected asset → finding`
+Seed does **not** insert `findings`. Phase 2C correlation-service creates them from `cve.normalized` (or `POST /internal/correlation/run/{cveId}`).
 
 Fictional organization: **Northwind Financial**.
 
-| Scenario | CVE | Severity | Expected match (later) | Why |
+| Scenario | CVE | Severity | Expected finding (Phase 2C) | Why |
 |----------|-----|----------|------------------------|-----|
 | A | CVE-2021-44228 | CRITICAL | `nw-prod-edge-gw-01` | Internet-facing production, business-critical, Log4j 2.14.1, KEV |
 | B | CVE-2022-3602 | HIGH | `nw-int-jump-01` (also `nw-edge-vpn-01`) | OpenSSL 3.0.2; bastion is internal production |
