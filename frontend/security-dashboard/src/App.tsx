@@ -18,7 +18,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/vulnerabilities" element={<VulnerabilitiesPage />} />
-        <Route path="/vulnerabilities/:id" element={<VulnerabilityDetailPage />} />
+        <Route path="/vulnerabilities/:cveId" element={<VulnerabilityDetailPage />} />
         <Route path="/assets" element={<AssetsPage />} />
         <Route path="/assets/:id" element={<AssetDetailPage />} />
         <Route path="/findings" element={<FindingsPage />} />

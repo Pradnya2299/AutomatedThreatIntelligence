@@ -1,43 +1,36 @@
-# HTTP API (Phase 1)
+# HTTP API
 
 The dashboard talks **only** to **api-service** (default `http://localhost:8080`).
 
-OpenAPI generation (springdoc) will be added when resource endpoints exist. Phase 1 exposes health only.
-
-## Implemented now
+## Implemented
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/` or `/api` | public | Explains which endpoints exist in Phase 2A |
-| GET | `/api/health` | public | Liveness-style JSON: service name, status, timestamp |
-| GET | `/api/me` | HTTP Basic | Current in-memory user (`admin` / `admin_change_me`, etc.) |
-| GET | `/actuator/health` | public | Spring Boot actuator (includes db + redis) |
-| GET | `/actuator/info` | public | Build info when available |
+| GET | `/` or `/api` | public | Service index |
+| GET | `/api/health` | public | Liveness JSON |
+| GET | `/api/me` | HTTP Basic | Current in-memory user |
+| GET | `/api/dashboard/summary` | HTTP Basic | KPIs, risk distribution, top CVEs, activity |
+| GET | `/api/vulnerabilities` | HTTP Basic | Paged CVE list (`q`, `severity`, `risk`, `page`, `size`) |
+| GET | `/api/vulnerabilities/{cveId}` | HTTP Basic | CVE detail + affected assets |
+| GET | `/api/findings` | HTTP Basic | Paged findings |
+| GET | `/api/findings/{id}` | HTTP Basic | Match explanation, risk, AI plan |
+| GET | `/api/assets` | HTTP Basic | Paged assets |
+| GET | `/api/assets/{id}` | HTTP Basic | Software + findings |
+| GET | `/api/remediation` | HTTP Basic | Paged AI plans |
+| GET | `/api/remediation/{id}` | HTTP Basic | Full structured plan |
+| GET | `/actuator/health` | public | Actuator |
 
-## Planned (later phases) — contract names only
+List responses: `{ content, page, size, totalElements, totalPages }`.
 
-- `GET /api/dashboard`
-- `GET /api/vulnerabilities`, `GET /api/vulnerabilities/{id}`
-- `GET /api/assets`, `GET /api/assets/{id}`
-- `GET /api/findings`, `GET /api/findings/{id}`
-- `GET /api/risk-assessments/{id}`
-- `GET /api/remediation-plans`, `GET /api/remediation-plans/{id}`
-- `POST /api/remediation-plans/{id}/approve`
-- `POST /api/remediation-plans/{id}/reject`
-- `POST /api/ingestion/cve`
-- `GET /api/system/status`
+DTOs only — JPA entities are not returned.
 
-Responses will use DTOs, not JPA entities. Error body (planned):
+Error body:
 
 ```json
 {
   "code": "FINDING_NOT_FOUND",
-  "message": "Finding not found",
+  "message": "Unable to load that finding.",
   "correlationId": "uuid",
   "timestamp": "ISO-8601"
 }
 ```
-
-## Headers
-
-Clients should send `X-Correlation-Id`. If absent, api-service generates one and returns it on the response.

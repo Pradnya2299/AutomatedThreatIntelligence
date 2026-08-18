@@ -1,15 +1,12 @@
 # Security dashboard
 
-React + TypeScript + Vite SOC console. Phase 1 is a routed shell with Tailwind and shadcn-style primitives. API calls other than dashboard health are not implemented yet.
+React + TypeScript + Vite SOC console. Talks only to api-service.
 
 ```bash
 npm install
+npm test
+npm run build
 npm run dev
 ```
 
-http://localhost:5173 — Vite proxies `/api` to api-service `:8080`.
-
-```bash
-npm run build
-npx playwright test   # requires browsers; optional in Phase 1
-```
+http://localhost:5173 — Vite proxies `/api` to api-service `:8080` and attaches local HTTP Basic (`analyst` / `analyst_change_me` by default).

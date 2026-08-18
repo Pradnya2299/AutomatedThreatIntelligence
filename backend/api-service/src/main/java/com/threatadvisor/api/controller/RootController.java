@@ -16,10 +16,16 @@ public class RootController {
     public Map<String, Object> root() {
         return Map.of(
                 "service", "api-service",
-                "phase", "2A",
-                "message", "Infrastructure API only. Dashboard resource APIs are not implemented yet.",
+                "phase", "4",
+                "message", "SOC dashboard BFF. React talks only to api-service.",
                 "public", List.of("GET /api/health", "GET /actuator/health"),
-                "authenticated", List.of("GET /api/me")
+                "authenticated", List.of(
+                        "GET /api/me",
+                        "GET /api/dashboard/summary",
+                        "GET /api/vulnerabilities",
+                        "GET /api/findings",
+                        "GET /api/assets",
+                        "GET /api/remediation")
         );
     }
 }

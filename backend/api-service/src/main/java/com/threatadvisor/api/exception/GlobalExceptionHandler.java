@@ -21,11 +21,16 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<Map<String, Object>> api(ApiException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(error(ex.getCode(), ex.getMessage()));
+    }
+
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
     public ResponseEntity<Map<String, Object>> notFound(Exception ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error(
                 "NOT_FOUND",
-                "No API endpoint at this path. Phase 2A exposes GET /api/health, GET /api, GET /api/me, and /actuator/health."
+                "No API endpoint at this path."
         ));
     }
 

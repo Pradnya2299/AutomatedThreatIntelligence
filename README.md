@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform. **Phase 3** adds RAG + structured remediation in ai-service. The React dashboard is **not** implemented yet.
+This repository is a **multi-service, event-driven** platform. **Phase 4** adds the React SOC dashboard over api-service.
 
 ## Current phase
 
-**Phase 3 — Contextual remediation advisor.** See [docs/ai/phase-3.md](docs/ai/phase-3.md).
+**Phase 4 — Security operations dashboard.** See [docs/ui/phase-4.md](docs/ui/phase-4.md).
 
 ## Repository layout
 
@@ -106,7 +106,15 @@ npm install
 npm run dev
 ```
 
-Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
+Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080 with local HTTP Basic).
+
+```bash
+cd frontend/security-dashboard
+npm install
+npm test
+npm run build
+npm run dev
+```
 
 ## Architecture snapshot
 
@@ -128,6 +136,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 4 dashboard](docs/ui/phase-4.md)
 - [Phase 3 AI](docs/ai/phase-3.md)
 - [Phase 2D risk](docs/risk/phase-2d.md)
 - [Phase 2C correlation](docs/correlation/phase-2c.md)
@@ -136,7 +145,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 
 ## Next phase (recommended)
 
-**Phase 4** (optional) can add **api-service REST + React dashboard** over findings, risk, and generated plans. Approval/execution remain later.
+**Phase 5** can add human review/approval of remediation plans (no autonomous execution).
 
 ## License
 
