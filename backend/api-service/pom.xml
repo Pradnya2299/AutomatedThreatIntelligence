@@ -103,8 +103,9 @@
                         </goals>
                         <configuration>
                             <target>
+                                <mkdir dir="${project.build.outputDirectory}/db/migration"/>
                                 <delete>
-                                    <fileset dir="${project.build.outputDirectory}/db/migration" includes="*.sql"/>
+                                    <fileset dir="${project.build.outputDirectory}/db/migration" includes="*.sql" erroronmissingdir="false"/>
                                 </delete>
                             </target>
                         </configuration>
