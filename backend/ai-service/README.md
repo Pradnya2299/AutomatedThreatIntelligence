@@ -1,21 +1,13 @@
 # ai-service
 
-Tool-based AI orchestrator and RAG consumer (OpenAI in later phases).
-
-## Run
-
-Infrastructure must be up (`docker compose up -d` from repo root).
+RAG + structured remediation advisor. See [docs/ai/phase-3.md](../../docs/ai/phase-3.md).
 
 ```bash
-cd backend
+export AI_DEMO_MODE=true   # default; no OpenAI key required
 ./mvnw -pl ai-service spring-boot:run
 ```
 
-Health: http://localhost:8084/api/health  
-Actuator: http://localhost:8084/actuator/health
+Health: http://localhost:8084/api/health
 
-## Package layout
-
-`com.threatadvisor.ai` — controller, config, dto, exception, plus empty service/domain/repository/kafka packages for later phases.
-
-Do not put business logic in controllers or Kafka consumers.
+- `POST /internal/ai/knowledge/ingest`
+- `POST /internal/ai/remediation/{findingId}`

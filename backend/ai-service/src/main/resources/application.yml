@@ -17,27 +17,52 @@ spring:
           time_zone: UTC
   flyway:
     enabled: false
-    locations: classpath:db/migration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ai-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
     listener:
-      auto-startup: false
+      auto-startup: true
+      ack-mode: record
+      missing-topics-fatal: false
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+      timeout: 200ms
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 
 server:
   port: ${AI_SERVICE_PORT:8084}
+
+ai:
+  demo-mode: ${AI_DEMO_MODE:true}
+  api-key: ${OPENAI_API_KEY:}
+  chat-model: ${OPENAI_MODEL:gpt-4o-mini}
+  embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+  top-k: ${AI_RAG_TOP_K:5}
+  prompt-version: v1
+  cache-ttl-seconds: 3600
+  ingest-on-startup: true
+  chunk-size-chars: 2000
+  chunk-overlap-chars: 200
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
 
 management:
   endpoints:
@@ -48,9 +73,17 @@ management:
     health:
       probes:
         enabled: true
+      show-details: always
+  health:
+    db:
+      enabled: true
+    kafka:
+      enabled: true
+    redis:
+      enabled: false
   tracing:
     enabled: false
 
 logging:
   pattern:
-    console: '%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX} service=ai-service level=%p correlationId=%X{correlationId:-} eventId=%X{eventId:-} operation=%X{operation:-} %msg%n'
+    console: '%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX} service=ai-service level=%p correlationId=%X{correlationId:-} eventId=%X{eventId:-} cveId=%X{cveId:-} findingId=%X{findingId:-} assetId=%X{assetId:-} riskAssessmentId=%X{riskAssessmentId:-} remediationPlanId=%X{remediationPlanId:-} operation=%X{operation:-} %msg%n'

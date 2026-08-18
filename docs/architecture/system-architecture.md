@@ -73,7 +73,7 @@ External CVE source
    notification.requested  notification-service
 ```
 
-Phase 1 does **not** wire this pipeline. Topics, envelope, and tables exist so Phase 2 can attach consumers without redesign.
+Phase 3 wires `risk.calculated` → ai-service RAG + structured remediation → `remediation.generated`. Approval and execution remain later.
 
 ## Communication rules
 
@@ -125,7 +125,7 @@ Kafka auto-configuration is enabled on **ingestion-service** for `cve.raw` / `cv
 1. **Phase 2A:** Docker Compose, Flyway, demo seed (done).
 2. **Phase 2B:** CVE ingest, normalize, persist, Kafka `cve.raw` / `cve.normalized` (done).
 3. **Phase 2C:** CPE/vendor/product/version correlation, findings, `finding.created` (done).
-4. **Phase 2D (this branch):** deterministic risk on `finding.created` → `risk.calculated` (done).
-5. **Phase 3 — API + dashboard:** REST DTOs, authn/z, screens bound to real data.
-6. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval.
+4. **Phase 2D:** deterministic risk on `finding.created` → `risk.calculated` (done).
+5. **Phase 3 (this branch):** RAG + structured remediation on `risk.calculated` (done). No dashboard.
+6. **Phase 4 — API + dashboard:** REST DTOs, authn/z, screens bound to real data.
 7. **Phase 5 — hardening:** E2E tests, DLQ processors, metrics, images.

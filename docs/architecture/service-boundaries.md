@@ -46,7 +46,9 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 ## ai-service
 
-**Owns:** tool-based context assembly, RAG retrieval **through application tools**, structured OpenAI responses, `remediation_plans` draft creation, publish `remediation.requested` / `remediation.generated`.
+**Owns:** RAG over `knowledge_chunks`, structured OpenAI (or demo) remediation, `remediation_plans` status GENERATED, publish `remediation.generated`.
+
+**Does not:** decide vulnerability or risk; execute patches; approve work; persist invalid JSON; log API keys.
 
 **Does not:** connect the LLM to JDBC or arbitrary SQL; execute patches; approve work; bypass schema validation of model output.
 

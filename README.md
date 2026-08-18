@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2D** adds a deterministic risk engine. RAG and OpenAI are **not** implemented yet.
+This repository is a **multi-service, event-driven** platform. **Phase 3** adds RAG + structured remediation in ai-service. The React dashboard is **not** implemented yet.
 
 ## Current phase
 
-**Phase 2D — Deterministic risk scoring.** See [docs/risk/phase-2d.md](docs/risk/phase-2d.md).
+**Phase 3 — Contextual remediation advisor.** See [docs/ai/phase-3.md](docs/ai/phase-3.md).
 
 ## Repository layout
 
@@ -128,6 +128,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 3 AI](docs/ai/phase-3.md)
 - [Phase 2D risk](docs/risk/phase-2d.md)
 - [Phase 2C correlation](docs/correlation/phase-2c.md)
 - [Phase 2B ingestion](docs/ingestion/phase-2b.md)
@@ -135,7 +136,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 
 ## Next phase (recommended)
 
-**Phase 3** should add **api-service REST + React dashboard** over findings and risk — still without OpenAI unless a later AI phase.
+**Phase 4** (optional) can add **api-service REST + React dashboard** over findings, risk, and generated plans. Approval/execution remain later.
 
 ## License
 

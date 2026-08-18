@@ -121,13 +121,21 @@ Published by risk-service after upserting `risk_assessments`.
 }
 ```
 
-### remediation.requested / generated / approved / completed
+### remediation.generated
+
+Published by ai-service after a validated GENERATED plan is committed.
 
 ```json
 {
   "remediationPlanId": "uuid",
   "findingId": "uuid",
-  "status": "PENDING_APPROVAL|APPROVED|REJECTED|COMPLETED|FAILED"
+  "riskAssessmentId": "uuid",
+  "cveId": "CVE-2021-44228",
+  "assetId": "uuid",
+  "priority": "IMMEDIATE",
+  "summary": "...",
+  "recommendedAction": "...",
+  "status": "GENERATED"
 }
 ```
 

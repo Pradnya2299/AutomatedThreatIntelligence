@@ -12,7 +12,9 @@ PostgreSQL + **pgvector**:
 - `knowledge_chunks` — text, ordinal, metadata, `embedding vector`
 - Document types (seed targets): vulnerability management, patch management, emergency change, Linux/Windows security standards, application security, asset criticality, incident response
 
-Embeddings are stored next to chunks so retrieval is transactional with the rest of the system of record. Redis key `rag:query:{hash}` may cache nearest-neighbor results.
+Embeddings are stored next to chunks so retrieval is transactional with the rest of the system of record. Redis may cache identical AI JSON responses; it is never the source of truth.
+
+Phase 3 implements classpath ingest, demo or OpenAI embeddings, and cosine-distance search via pgvector (`<=>`).
 
 ## Pipeline (target, not Phase 1 runtime)
 
