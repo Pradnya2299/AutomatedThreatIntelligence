@@ -4,7 +4,7 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 ## api-service
 
-**Owns:** synchronous SecOps API, authentication/authorization, dashboard aggregations, human approval/rejection of remediation, triggering manual CVE ingestion, Flyway migrations in local/dev.
+**Owns:** synchronous SecOps API, authentication/authorization, dashboard aggregations, human approval/rejection of remediation, triggering manual CVE ingestion, **Flyway schema application** (only migrator).
 
 **Does:** REST for `/api/*`, Spring Security roles, audit of user actions, publish `cve.raw` (when an analyst submits a CVE) and `remediation.approved`.
 
@@ -61,6 +61,10 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 **Owns:** SOC UI. Calls api-service only.
 
 **Does not:** access PostgreSQL, Redis, or Kafka.
+
+## Logical data ownership (shared database)
+
+See [logical-ownership.md](../database/logical-ownership.md). ingestion writes vulnerabilities; correlation writes findings; risk writes risk_assessments; AI writes remediation/knowledge; notification writes notifications; api-service reads/orchestrates and applies Flyway.
 
 ## Boundary violations to reject in review
 

@@ -1,5 +1,5 @@
 -- V1: core domain schema for Automated Threat Intelligence & Patch Advisor.
--- Canonical copy lives in database/migrations and api-service classpath db/migration.
+-- Canonical location: database/migrations/ (copied into api-service at build time).
 
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -203,7 +203,12 @@ CREATE TABLE knowledge_chunks (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE UNIQUE INDEX uq_knowledge_chunks_document_index
+    ON knowledge_chunks (document_id, chunk_index);
 CREATE INDEX idx_knowledge_chunks_document ON knowledge_chunks (document_id);
+
+COMMENT ON COLUMN knowledge_chunks.embedding IS
+    'pgvector embedding; dimension 1536 for OpenAI text-embedding-3-small. NULL until Phase 4 RAG.';
 
 CREATE TABLE notifications (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -236,12 +241,42 @@ CREATE INDEX idx_audit_logs_correlation ON audit_logs (correlation_id);
 
 CREATE TABLE event_processing_records (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_id        UUID NOT NULL UNIQUE,
+    event_id        UUID NOT NULL,
     event_type      VARCHAR(128) NOT NULL,
     consumer        VARCHAR(128) NOT NULL,
     status          VARCHAR(32) NOT NULL,
     processed_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    metadata        JSONB NOT NULL DEFAULT '{}'::jsonb
+    metadata        JSONB NOT NULL DEFAULT '{}'::jsonb,
+    CONSTRAINT uq_event_processing_event_consumer UNIQUE (event_id, consumer)
 );
 
 CREATE INDEX idx_event_processing_consumer ON event_processing_records (consumer, event_type);
+
+ALTER TABLE assets ADD CONSTRAINT ck_assets_environment
+    CHECK (environment IN ('PRODUCTION', 'STAGING', 'DEVELOPMENT', 'LAB'));
+ALTER TABLE assets ADD CONSTRAINT ck_assets_criticality
+    CHECK (business_criticality IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'));
+ALTER TABLE assets ADD CONSTRAINT ck_assets_status
+    CHECK (status IN ('ACTIVE', 'INACTIVE', 'DECOMMISSIONED'));
+ALTER TABLE findings ADD CONSTRAINT ck_findings_status
+    CHECK (status IN ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'FALSE_POSITIVE', 'ACCEPTED_RISK'));
+ALTER TABLE risk_assessments ADD CONSTRAINT ck_risk_level
+    CHECK (risk_level IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'));
+ALTER TABLE remediation_plans ADD CONSTRAINT ck_remediation_status
+    CHECK (status IN ('DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'COMPLETED', 'FAILED'));
+
+COMMENT ON TABLE organizations IS 'Shared reference data. api-service orchestrates reads.';
+COMMENT ON TABLE users IS 'Identity store. api-service owns authentication mapping.';
+COMMENT ON TABLE roles IS 'ADMIN, SECURITY_ANALYST, SECURITY_MANAGER, VIEWER.';
+COMMENT ON TABLE assets IS 'Logical owner: api-service (inventory/CMDB). Read by correlation.';
+COMMENT ON TABLE asset_software IS 'Logical owner: api-service (inventory). Read by correlation.';
+COMMENT ON TABLE vulnerabilities IS 'Logical owner: ingestion-service.';
+COMMENT ON TABLE vulnerability_cpe IS 'Logical owner: ingestion-service.';
+COMMENT ON TABLE findings IS 'Logical owner: correlation-service.';
+COMMENT ON TABLE risk_assessments IS 'Logical owner: risk-service.';
+COMMENT ON TABLE remediation_plans IS 'Logical owner: ai-service (drafts); api-service updates approval.';
+COMMENT ON TABLE knowledge_documents IS 'Logical owner: ai-service (RAG corpus).';
+COMMENT ON TABLE knowledge_chunks IS 'Logical owner: ai-service. embedding vector(1536).';
+COMMENT ON TABLE notifications IS 'Logical owner: notification-service.';
+COMMENT ON TABLE audit_logs IS 'Written by all services; api-service reads for audit UI.';
+COMMENT ON TABLE event_processing_records IS 'Consumer idempotency; unique per (event_id, consumer).';

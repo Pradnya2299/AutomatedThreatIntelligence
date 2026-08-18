@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). Phase 1 delivers the **foundation**: repository layout, architecture documentation, Spring Boot skeletons with health endpoints, a React dashboard shell, Flyway schema, Kafka topic bootstrap, and a Docker Compose infrastructure stack.
+This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2A** makes local infrastructure and Flyway/demo data executable. Domain engines (ingestion, correlation, risk, RAG, OpenAI) are **not** implemented yet.
 
 ## Current phase
 
-**Phase 1 — architecture and skeletons.** Domain engines (ingestion, correlation, risk, RAG, OpenAI, remediation execution) are **not** implemented yet. See [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md).
+**Phase 2A — infrastructure, schema, demo data.** See [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md), [docs/database/flyway.md](docs/database/flyway.md), and [docs/database/demo-scenarios.md](docs/database/demo-scenarios.md).
 
 ## Repository layout
 
@@ -21,7 +21,7 @@ This repository is a **multi-service, event-driven** platform (not a single Spri
 │   └── notification-service/
 ├── frontend/security-dashboard/   # React + TypeScript + Vite
 ├── database/migrations/     # Canonical Flyway SQL
-├── database/seed/           # Demo inventory and knowledge (Phase 1 seed)
+├── database/seed/           # Demo inventory and CVEs (scenarios A–E)
 ├── infrastructure/          # Postgres, Kafka, Redis, Docker notes
 ├── docs/                    # Architecture, API, Kafka, ADRs
 ├── scripts/
@@ -55,20 +55,17 @@ Services:
 | Kafka | `localhost:9092` |
 | Kafka UI | http://localhost:8088 |
 
-Apply schema (api-service owns Flyway in local development):
+## Run Flyway (without starting Spring)
+
+After Compose is healthy:
 
 ```bash
-cd backend
-./mvnw -pl api-service -am spring-boot:run
-```
-
-Or apply SQL with Flyway CLI / `psql` against files in `database/migrations/`.
-
-Load demo seed (after migrations):
-
-```bash
+./scripts/migrate.sh
 ./scripts/seed-database.sh
+./scripts/verify-infra.sh
 ```
+
+Alternatively start api-service; it applies the same `database/migrations/` files via Flyway.
 
 ## Run backend services
 
@@ -128,7 +125,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 
 ## Next phase (recommended)
 
-Phase 2 should implement **CVE ingestion/normalization**, **idempotent Kafka consumers**, **correlation**, and **deterministic risk** — still without OpenAI. See the end of [system architecture](docs/architecture/system-architecture.md).
+**Phase 2B** should implement **CVE ingestion/normalization**, **idempotent Kafka consumers**, **CPE correlation**, and **deterministic risk** — still without OpenAI or RAG. Do not start that work in this branch.
 
 ## License
 

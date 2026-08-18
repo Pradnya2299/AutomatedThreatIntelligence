@@ -2,7 +2,7 @@
 
 ## Role of PostgreSQL
 
-PostgreSQL is the **system of record** for organizations, assets, vulnerabilities, findings, risk, remediation, knowledge, users, notifications, audit, and consumer idempotency. Hibernate must not create tables in production (`ddl-auto=validate`). Schema changes go through **Flyway** in `database/migrations/` (copied into api-service `classpath:db/migration` so `spring-boot:run` applies them).
+PostgreSQL is the **system of record** for organizations, assets, vulnerabilities, findings, risk, remediation, knowledge, users, notifications, audit, and consumer idempotency. Hibernate must not create tables in production (`ddl-auto=validate`). Schema changes go through **Flyway**. Canonical SQL is **`database/migrations/`**. api-service copies those files onto its classpath at build and is the only process that runs Flyway. See [flyway.md](flyway.md) and [logical-ownership.md](logical-ownership.md).
 
 ## Identifier strategy
 
@@ -38,13 +38,24 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 ## Uniqueness for idempotency
 
 - `vulnerabilities.cve_id`
+- `assets (organization_id, hostname)`
+- `findings (asset_id, vulnerability_id)`
+- `event_processing_records (event_id, consumer)`
+- `knowledge_chunks (document_id, chunk_index)`
+- `asset_software (asset_id, vendor, product, version)` (V3)
+
+## pgvector
+
+`knowledge_chunks.embedding` is `vector(1536)` for **OpenAI `text-embedding-3-small`**. Phase 2A does not populate embeddings.
 - `findings (asset_id, vulnerability_id)`
 - `event_processing_records.event_id` unique
 - `risk_assessments` one current row per finding (`finding_id` unique in V1)
 
 ## Flyway vs services
 
-**api-service** runs Flyway on startup (`spring.flyway.enabled=true`). Other services set Flyway off and `ddl-auto=validate` once they map entities. Until entities exist, they use `ddl-auto=none`.
+**api-service** runs Flyway on startup (`spring.flyway.enabled=true`). Other services set Flyway off. Hibernate is `ddl-auto=validate` everywhere — never `create` / `update`.
+
+`knowledge_chunks.embedding` is `vector(1536)` for planned model **text-embedding-3-small**. Embeddings are not populated in Phase 2A.
 
 ## Risk formula (documented now, implemented later)
 

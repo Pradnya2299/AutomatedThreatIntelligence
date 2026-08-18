@@ -118,11 +118,12 @@ Sharing a database in Phase 1 is a **deliberate simplification** so correlation 
 
 ## Phase 1 infrastructure clients
 
-Kafka and Redis **client auto-configuration is disabled** until consumers and caches exist, so health endpoints do not require those brokers. Connection properties remain in `application.yml`. api-service still requires PostgreSQL because it owns Flyway. Other services exclude DataSource auto-configuration in Phase 1 (no entities yet).
+Kafka and Redis **business consumers are not implemented**. Connection properties remain in `application.yml`. **api-service** enables Redis health and Flyway. Kafka auto-configuration stays off so missing consumers do not fail startup. Other services still exclude DataSource auto-configuration (no JPA entities yet).
 
 ## Recommended next phases
 
-1. **Phase 2 — pipeline core:** normalize CVE payloads, persist vulnerabilities, correlate against seeded assets, write findings, calculate risk, idempotent consumers, repository tests.
-2. **Phase 3 — API + dashboard:** implement listed REST DTOs, authn/z, finding/vuln/asset screens bound to real data.
-3. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval + simulation.
-4. **Phase 5 — hardening:** Testcontainers E2E, DLQ processors, metrics, container images per service.
+1. **Phase 2A (this branch):** Docker Compose (Postgres/pgvector, Redis, Kafka KRaft, Kafka UI), canonical Flyway, demo seed scenarios A–E, Testcontainers foundation.
+2. **Phase 2B — pipeline core:** normalize CVE payloads, persist vulnerabilities, CPE correlation against seeded assets, write findings, calculate risk, idempotent consumers. Still no OpenAI.
+3. **Phase 3 — API + dashboard:** implement listed REST DTOs, authn/z, finding/vuln/asset screens bound to real data.
+4. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval + simulation.
+5. **Phase 5 — hardening:** Testcontainers E2E, DLQ processors, metrics, container images per service.

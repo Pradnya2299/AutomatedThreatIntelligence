@@ -1,7 +1,6 @@
 # Local infrastructure for Automated Threat Intelligence & Patch Advisor.
-# Phase 1: Postgres (pgvector), Redis, Kafka (KRaft), Kafka UI.
-# Application services are intended to run from the host (Maven / Vite).
-# Service containers can be added in a later phase using the same Compose file.
+# Postgres (pgvector), Redis, Kafka (KRaft — no ZooKeeper), Kafka UI.
+# Application services run on the host in Phase 2A. Credentials below are LOCAL DEV ONLY.
 
 name: threat-advisor
 
@@ -23,7 +22,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-threat_advisor} -d ${POSTGRES_DB:-threat_advisor}"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
     networks:
       - threat-advisor
 
@@ -31,7 +30,7 @@ services:
     image: redis:7-alpine
     container_name: threat-advisor-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -41,7 +40,7 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 20
     networks:
       - threat-advisor
 
@@ -52,30 +51,30 @@ services:
     hostname: kafka
     ports:
       - "9092:9092"
-      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # Host clients use localhost:9092. Compose clients use kafka:29092.
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_INTERNAL://kafka:29092,CONTROLLER://kafka:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-      CLUSTER_ID: "threat-advisor-local-kraft-001"
+      CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list"]
       interval: 10s
       timeout: 10s
-      retries: 12
-      start_period: 20s
+      retries: 18
+      start_period: 25s
     networks:
       - threat-advisor
 
@@ -89,7 +88,7 @@ services:
       - ./infrastructure/kafka/create-topics.sh:/create-topics.sh:ro
     entrypoint: ["/bin/bash", "/create-topics.sh"]
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     networks:
       - threat-advisor
 
@@ -104,7 +103,13 @@ services:
       - "${KAFKA_UI_PORT:-8088}:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: threat-advisor-local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     networks:
       - threat-advisor
 
