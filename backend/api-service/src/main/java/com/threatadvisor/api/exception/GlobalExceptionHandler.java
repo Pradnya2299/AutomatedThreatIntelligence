@@ -5,10 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -16,14 +21,40 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    public ResponseEntity<Map<String, Object>> notFound(Exception ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error(
+                "NOT_FOUND",
+                "No API endpoint at this path. Phase 2A exposes GET /api/health, GET /api, GET /api/me, and /actuator/health."
+        ));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> forbidden(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error("FORBIDDEN", "Access denied"));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> unauthorized(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error("UNAUTHORIZED", "Authentication required"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handle(Exception ex) {
         log.error("Unhandled exception", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "code", "INTERNAL_ERROR",
-                "message", "An unexpected error occurred",
-                "correlationId", String.valueOf(MDC.get("correlationId")),
-                "timestamp", Instant.now().toString()
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error(
+                "INTERNAL_ERROR",
+                "An unexpected error occurred"
         ));
+    }
+
+    private static Map<String, Object> error(String code, String message) {
+        String correlationId = MDC.get("correlationId");
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", code);
+        body.put("message", message);
+        body.put("correlationId", correlationId == null ? "" : correlationId);
+        body.put("timestamp", Instant.now().toString());
+        return body;
     }
 }

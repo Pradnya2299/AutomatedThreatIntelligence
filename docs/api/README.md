@@ -8,8 +8,10 @@ OpenAPI generation (springdoc) will be added when resource endpoints exist. Phas
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
+| GET | `/` or `/api` | public | Explains which endpoints exist in Phase 2A |
 | GET | `/api/health` | public | Liveness-style JSON: service name, status, timestamp |
-| GET | `/actuator/health` | public | Spring Boot actuator |
+| GET | `/api/me` | HTTP Basic | Current in-memory user (`admin` / `admin_change_me`, etc.) |
+| GET | `/actuator/health` | public | Spring Boot actuator (includes db + redis) |
 | GET | `/actuator/info` | public | Build info when available |
 
 ## Planned (later phases) — contract names only
