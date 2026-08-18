@@ -1,0 +1,4 @@
+# Local profile: infrastructure via docker compose, apps on the host.
+spring:
+  jpa:
+    show-sql: false

@@ -1,0 +1,79 @@
+# Database design
+
+## Role of PostgreSQL
+
+PostgreSQL is the **system of record** for organizations, assets, vulnerabilities, findings, risk, remediation, knowledge, users, notifications, audit, and consumer idempotency. Hibernate must not create tables in production (`ddl-auto=validate`). Schema changes go through **Flyway** in `database/migrations/` (copied into api-service `classpath:db/migration` so `spring-boot:run` applies them).
+
+## Identifier strategy
+
+Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per org, event id) have unique constraints to make retries safe.
+
+## Core tables (V1)
+
+| Table | Purpose |
+|-------|---------|
+| organizations | Tenant / company |
+| users, roles, user_roles | Authn/z |
+| assets | Inventory (CMDB-ready) |
+| asset_software | Installed products / CPE / versions |
+| vulnerabilities | Normalized CVE + threat flags + raw payload |
+| vulnerability_cpe | CPE / vendor / product / version ranges |
+| findings | Asset × vulnerability match + explanation |
+| risk_assessments | Deterministic scores + reason list |
+| remediation_plans | AI (later) + approval workflow |
+| knowledge_documents / knowledge_chunks | RAG corpus + embeddings |
+| notifications | Outbound notification records |
+| audit_logs | Security-relevant actions |
+| event_processing_records | Consumer idempotency |
+
+## Indexes (V1)
+
+- vulnerabilities: unique `cve_id`; indexes on severity, published_at, exploit flags
+- assets: hostname; environment; internet exposure
+- asset_software: (vendor, product, version); cpe
+- findings: status; (asset_id, vulnerability_id) unique
+- risk_assessments: final_risk_score, risk_level
+- remediation_plans: status
+
+## Uniqueness for idempotency
+
+- `vulnerabilities.cve_id`
+- `findings (asset_id, vulnerability_id)`
+- `event_processing_records.event_id` unique
+- `risk_assessments` one current row per finding (`finding_id` unique in V1)
+
+## Flyway vs services
+
+**api-service** runs Flyway on startup (`spring.flyway.enabled=true`). Other services set Flyway off and `ddl-auto=validate` once they map entities. Until entities exist, they use `ddl-auto=none`.
+
+## Risk formula (documented now, implemented later)
+
+Configurable weights (defaults):
+
+```
+technical_risk      = f(cvss, CWE class)                          # 0–100
+exploitability      = f(exploit_available, active_exploitation)    # 0–100
+exposure            = f(internet_facing, environment)              # 0–100
+asset_criticality   = mapped from asset.business_criticality       # 0–100
+business_impact     = f(asset_criticality, environment, affected_count)
+
+final_risk = round(
+    0.30 * technical_risk
+  + 0.25 * exploitability
+  + 0.20 * exposure
+  + 0.15 * business_impact
+  + 0.10 * asset_criticality
+)
+```
+
+Levels: `LOW` 0–24, `MEDIUM` 25–49, `HIGH` 50–74, `CRITICAL` 75–100.
+
+The LLM must not replace this formula. Reasons stored as JSON (CVSS, KEV, internet-facing, production, criticality).
+
+## JSON columns
+
+`raw_source_payload`, `metadata`, `match_explanation`, `risk_reasons`, `audit.metadata` use JSONB for incomplete external data without schema churn.
+
+## pgvector
+
+`knowledge_chunks.embedding vector(1536)` matches OpenAI `text-embedding-3-small`. IVFFlat/HNSW can be added when volume warrants; V1 uses a vector cosine index where supported.

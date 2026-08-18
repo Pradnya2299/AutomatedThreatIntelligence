@@ -1,0 +1,119 @@
+# Local infrastructure for Automated Threat Intelligence & Patch Advisor.
+# Phase 1: Postgres (pgvector), Redis, Kafka (KRaft), Kafka UI.
+# Application services are intended to run from the host (Maven / Vite).
+# Service containers can be added in a later phase using the same Compose file.
+
+name: threat-advisor
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: threat-advisor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-threat_advisor}
+      POSTGRES_USER: ${POSTGRES_USER:-threat_advisor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-threat_advisor_dev_change_me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-threat_advisor} -d ${POSTGRES_DB:-threat_advisor}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - threat-advisor
+
+  redis:
+    image: redis:7-alpine
+    container_name: threat-advisor-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - threat-advisor
+
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: threat-advisor-kafka
+    restart: unless-stopped
+    hostname: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      CLUSTER_ID: "threat-advisor-local-kraft-001"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - threat-advisor
+
+  kafka-init:
+    image: apache/kafka:3.9.0
+    container_name: threat-advisor-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./infrastructure/kafka/create-topics.sh:/create-topics.sh:ro
+    entrypoint: ["/bin/bash", "/create-topics.sh"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    networks:
+      - threat-advisor
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: threat-advisor-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "${KAFKA_UI_PORT:-8088}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: threat-advisor-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - threat-advisor
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+
+networks:
+  threat-advisor:
+    name: threat-advisor
+    driver: bridge
