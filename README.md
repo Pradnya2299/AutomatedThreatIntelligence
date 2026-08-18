@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2A** makes local infrastructure and Flyway/demo data executable. Domain engines (ingestion, correlation, risk, RAG, OpenAI) are **not** implemented yet.
+This repository is a **multi-service, event-driven** platform (not a single Spring Boot monolith). **Phase 2B** adds CVE ingestion and normalization. Domain engines (correlation, risk, RAG, OpenAI) are **not** implemented yet.
 
 ## Current phase
 
-**Phase 2A — infrastructure, schema, demo data.** See [docs/architecture/system-architecture.md](docs/architecture/system-architecture.md), [docs/database/flyway.md](docs/database/flyway.md), and [docs/database/demo-scenarios.md](docs/database/demo-scenarios.md).
+**Phase 2B — CVE ingestion / normalization.** See [docs/ingestion/phase-2b.md](docs/ingestion/phase-2b.md).
 
 ## Repository layout
 
@@ -132,7 +132,7 @@ Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080).
 
 ## Next phase (recommended)
 
-**Phase 2B** should implement **CVE ingestion/normalization**, **idempotent Kafka consumers**, **CPE correlation**, and **deterministic risk** — still without OpenAI or RAG. Do not start that work in this branch.
+**Phase 2C** should implement **CPE correlation against seeded assets**, **findings**, and **deterministic risk** — still without OpenAI or RAG.
 
 ## License
 

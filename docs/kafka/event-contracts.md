@@ -32,21 +32,31 @@ Consumers **must ignore unknown payload fields** (forward compatible).
 
 ### cve.raw
 
+Published after a raw row is committed. `eventId` is stable per `(source, cveId)`.
+
 ```json
 {
-  "source": "nvd|manual|osv",
-  "sourceUrl": "https://...",
+  "rawRecordId": "uuid",
+  "cveId": "CVE-2024-90001",
+  "source": "manual",
+  "payloadHash": "sha256-hex",
   "receivedAt": "ISO-8601",
   "raw": { }
 }
 ```
 
+The original document is also stored in `cve_raw_records.payload` (immutable).
+
 ### cve.normalized
+
+IDs only so downstream services load the canonical row (avoids duplicating large NVD documents on the bus).
 
 ```json
 {
   "vulnerabilityId": "uuid",
-  "cveId": "CVE-2024-12345"
+  "cveId": "CVE-2024-90001",
+  "severity": "CRITICAL",
+  "rawRecordEventId": "uuid"
 }
 ```
 

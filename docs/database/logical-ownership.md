@@ -6,7 +6,7 @@ One PostgreSQL database is shared (hackathon pragmatism; ADR-003). **Do not** ad
 |-------|------------------------|-----------------|
 | organizations, users, roles, user_roles | api-service | all |
 | assets, asset_software | api-service (inventory) | correlation, api |
-| vulnerabilities, vulnerability_cpe | ingestion-service | api, correlation, risk, ai (via tools later) |
+| cve_raw_records, vulnerabilities, vulnerability_cpe | ingestion-service | api, correlation, risk, ai (via tools later) |
 | findings | correlation-service | api, risk, ai |
 | risk_assessments | risk-service | api, ai |
 | remediation_plans, knowledge_documents, knowledge_chunks | ai-service (api-service updates approval columns) | api, notification |

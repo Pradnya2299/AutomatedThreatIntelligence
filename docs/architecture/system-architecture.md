@@ -118,12 +118,13 @@ Sharing a database in Phase 1 is a **deliberate simplification** so correlation 
 
 ## Phase 1 infrastructure clients
 
-Kafka and Redis **business consumers are not implemented**. Connection properties remain in `application.yml`. **api-service** enables Redis health and Flyway. Kafka auto-configuration stays off so missing consumers do not fail startup. Other services still exclude DataSource auto-configuration (no JPA entities yet).
+Kafka auto-configuration is enabled on **ingestion-service** for `cve.raw` / `cve.normalized`. **api-service** still excludes Kafka auto-config. Redis remains cache-only.
 
 ## Recommended next phases
 
-1. **Phase 2A (this branch):** Docker Compose (Postgres/pgvector, Redis, Kafka KRaft, Kafka UI), canonical Flyway, demo seed scenarios A–E, Testcontainers foundation.
-2. **Phase 2B — pipeline core:** normalize CVE payloads, persist vulnerabilities, CPE correlation against seeded assets, write findings, calculate risk, idempotent consumers. Still no OpenAI.
-3. **Phase 3 — API + dashboard:** implement listed REST DTOs, authn/z, finding/vuln/asset screens bound to real data.
-4. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval + simulation.
-5. **Phase 5 — hardening:** Testcontainers E2E, DLQ processors, metrics, container images per service.
+1. **Phase 2A:** Docker Compose, Flyway, demo seed (done).
+2. **Phase 2B (this branch):** CVE ingest, normalize, persist, Kafka `cve.raw` / `cve.normalized` (done).
+3. **Phase 2C:** CPE correlation against seeded assets, findings, deterministic risk. Still no OpenAI.
+4. **Phase 3 — API + dashboard:** REST DTOs, authn/z, screens bound to real data.
+5. **Phase 4 — AI + RAG:** tool interfaces, embeddings, structured remediation JSON, human approval.
+6. **Phase 5 — hardening:** E2E tests, DLQ processors, metrics, images.
