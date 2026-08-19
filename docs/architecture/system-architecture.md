@@ -73,7 +73,7 @@ External CVE source
    notification.requested  notification-service
 ```
 
-Phase 3 wires `risk.calculated` → ai-service RAG + structured remediation → `remediation.generated`. Approval and execution remain later.
+Phase 3 wires `risk.calculated` → ai-service RAG + structured remediation → `remediation.generated`. Phase 5A adds an explicit multi-agent investigation on REST/`security.investigation.requested` without replacing that path. Approval and execution remain later.
 
 ## Communication rules
 
@@ -97,6 +97,7 @@ One PostgreSQL database is shared. Logical ownership:
 | findings | correlation-service | api, risk, ai |
 | risk_assessments | risk-service | api, ai |
 | remediation_plans | ai-service / api-service (approval) | api, notification |
+| security_investigations | ai-service | api (via ai-service) |
 | knowledge_* | api-service / future admin | ai-service via tool APIs, not raw SQL from the LLM |
 | notifications | notification-service | api |
 | audit_logs, event_processing_records | all services | api (admin) |
@@ -127,5 +128,6 @@ Kafka auto-configuration is enabled on **ingestion-service** for `cve.raw` / `cv
 3. **Phase 2C:** CPE/vendor/product/version correlation, findings, `finding.created` (done).
 4. **Phase 2D:** deterministic risk on `finding.created` → `risk.calculated` (done).
 5. **Phase 3 (this branch):** RAG + structured remediation on `risk.calculated` (done). No dashboard.
-6. **Phase 4 — API + dashboard:** REST DTOs, authn/z, screens bound to real data.
-7. **Phase 5 — hardening:** E2E tests, DLQ processors, metrics, images.
+6. **Phase 4 — API + dashboard:** REST DTOs, authn/z, screens bound to real data (done).
+7. **Phase 5A — multi-agent investigation:** orchestrator + tools on existing engines (this branch).
+8. **Later:** approval UX, E2E hardening, DLQ processors, metrics, images.

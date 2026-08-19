@@ -139,6 +139,32 @@ Published by ai-service after a validated GENERATED plan is committed.
 }
 ```
 
+### security.investigation.requested
+
+Optional async trigger. REST investigations do not publish this event (avoids double execution).
+
+```json
+{
+  "cveId": "CVE-2021-44228"
+}
+```
+
+### security.investigation.completed
+
+Published by ai-service after the orchestrator finishes (including controlled failures).
+
+```json
+{
+  "investigationId": "uuid",
+  "cveId": "CVE-2021-44228",
+  "status": "COMPLETED",
+  "affected": true,
+  "riskScore": 91.50,
+  "riskLevel": "CRITICAL",
+  "remediationPlanId": "uuid"
+}
+```
+
 ### notification.requested
 
 ```json

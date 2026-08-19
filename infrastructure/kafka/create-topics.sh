@@ -40,6 +40,8 @@ create_topic "remediation.generated" 3
 create_topic "notification.requested" 3
 create_topic "remediation.approved" 1
 create_topic "remediation.completed" 1
+create_topic "security.investigation.requested" 3
+create_topic "security.investigation.completed" 3
 
 create_topic "cve.raw.dlq" 1
 create_topic "cve.normalized.dlq" 1
@@ -50,6 +52,8 @@ create_topic "remediation.requested.dlq" 1
 create_topic "remediation.generated.dlq" 1
 create_topic "notification.requested.dlq" 1
 create_topic "remediation.approved.dlq" 1
+create_topic "security.investigation.requested.dlq" 1
+create_topic "security.investigation.completed.dlq" 1
 
 echo "Kafka topics:"
 /opt/kafka/bin/kafka-topics.sh --bootstrap-server "${BOOTSTRAP}" --list

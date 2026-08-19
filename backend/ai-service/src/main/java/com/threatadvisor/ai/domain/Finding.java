@@ -23,6 +23,10 @@ public class Finding {
     private UUID vulnerabilityId;
     @Column(nullable = false, length = 32)
     private String status;
+    @Column(name = "match_type", length = 32)
+    private String matchType;
+    @Column(name = "match_confidence", length = 16)
+    private String matchConfidence;
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "match_explanation", nullable = false, columnDefinition = "jsonb")
     private String matchExplanation;
@@ -43,6 +47,10 @@ public class Finding {
     public void setVulnerabilityId(UUID vulnerabilityId) { this.vulnerabilityId = vulnerabilityId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getMatchType() { return matchType; }
+    public void setMatchType(String matchType) { this.matchType = matchType; }
+    public String getMatchConfidence() { return matchConfidence; }
+    public void setMatchConfidence(String matchConfidence) { this.matchConfidence = matchConfidence; }
     public String getMatchExplanation() { return matchExplanation; }
     public void setMatchExplanation(String matchExplanation) { this.matchExplanation = matchExplanation; }
     public Instant getDetectedAt() { return detectedAt; }

@@ -8,29 +8,30 @@ The AI layer **explains and recommends**. It does **not** decide risk scores and
 - LLM output is probabilistic; patching production is not.
 - Tool-calling keeps the model inside a capability envelope.
 
+## Phase 5A status
+
+A deterministic **SecurityOrchestrator** in ai-service runs Threat Intelligence → Asset Investigation → Risk Analyst → Remediation. Tools call existing correlation-service, risk-service, repositories, and Phase 3 `RemediationGenerationService`. See [phase-5.md](../ai/phase-5.md).
+
 ## Phase 1 status
 
-This document is the target design. **No OpenAI client, no tool runtime, and no RAG indexer are implemented in Phase 1.**
+This document started as the target design. Phases 3–5A implemented RAG, structured remediation, and the investigation orchestrator. The isolation rules below still apply.
 
-## Orchestration (target)
+## Orchestration (Phase 3 event path + Phase 5A investigation)
 
-On `risk.calculated` (or analyst-triggered generate):
+On `risk.calculated` (unchanged): ai-service still generates a plan for that finding.
 
-1. ai-service loads finding id from the event payload (not from a free-form prompt).
-2. An orchestrator invokes **allow-listed tools** (Java methods), each implemented as an application service:
-   - `getVulnerability()`
-   - `getAffectedAssets()`
-   - `getAssetDetails()`
-   - `getRiskAssessment()`
-   - `searchKnowledgeBase()` (RAG; see rag-architecture.md)
-   - `getPatchInformation()`
-   - `getCorporatePolicy()`
-   - `generateRemediationPlan()` (assembles the LLM request; does not execute changes)
-3. Tool results are packed into a structured context object.
-4. OpenAI is asked for **JSON matching a schema** (priority, summary, reason, affectedAssetCount, recommendedAction, patchVersion, temporaryMitigation, verificationSteps, rollbackPlan, confidence).
-5. Output is schema-validated. Invalid JSON is retried once, then failed with an audit event — never stored as a trusted plan.
-6. A `remediation_plans` row is written as `PENDING_APPROVAL`.
-7. `remediation.generated` is published. Approval happens in api-service.
+On `POST /api/v1/investigations` or `security.investigation.requested`:
+
+1. Orchestrator creates `SecurityInvestigationContext` and a `security_investigations` row.
+2. Agents invoke **allow-listed tools** (Java):
+   - `CveLookupTool` / `VulnerabilityContextTool`
+   - `CorrelationTool` / `AffectedAssetLookupTool`
+   - `RiskCalculationTool`
+   - `RemediationGenerationTool` (RAG + structured LLM/demo output)
+3. Tool results stay in typed DTOs. The LLM never calculates risk or invents assets.
+4. `remediation.generated` may still be published by the Phase 3 path. `security.investigation.completed` is published when the investigation finishes.
+
+A `remediation_plans` row remains `GENERATED` until a later approval phase.
 
 ## Isolation rules
 

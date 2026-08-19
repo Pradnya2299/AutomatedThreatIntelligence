@@ -16,8 +16,8 @@ public class RootController {
     public Map<String, Object> root() {
         return Map.of(
                 "service", "api-service",
-                "phase", "4",
-                "message", "SOC dashboard BFF. React talks only to api-service.",
+                "phase", "5A",
+                "message", "SOC dashboard BFF plus CVE investigation orchestration proxy.",
                 "public", List.of("GET /api/health", "GET /actuator/health"),
                 "authenticated", List.of(
                         "GET /api/me",
@@ -25,7 +25,9 @@ public class RootController {
                         "GET /api/vulnerabilities",
                         "GET /api/findings",
                         "GET /api/assets",
-                        "GET /api/remediation")
+                        "GET /api/remediation",
+                        "POST /api/v1/investigations",
+                        "GET /api/v1/investigations/{id}")
         );
     }
 }

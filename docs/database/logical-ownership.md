@@ -10,6 +10,7 @@ One PostgreSQL database is shared (hackathon pragmatism; ADR-003). **Do not** ad
 | findings | correlation-service | api, risk, ai |
 | risk_assessments | risk-service | api, ai |
 | remediation_plans, knowledge_documents, knowledge_chunks | ai-service (api-service updates approval columns) | api, notification |
+| security_investigations | ai-service | api (via investigation API) |
 | notifications | notification-service | api |
 | audit_logs | all (append) | api |
 | event_processing_records | the consuming service | ops |

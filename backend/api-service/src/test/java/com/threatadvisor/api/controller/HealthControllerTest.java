@@ -28,7 +28,7 @@ class HealthControllerTest {
     void rootExplainsPhase2aSurface() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phase").value("4"));
+                .andExpect(jsonPath("$.phase").value("5A"));
     }
 
     @Test

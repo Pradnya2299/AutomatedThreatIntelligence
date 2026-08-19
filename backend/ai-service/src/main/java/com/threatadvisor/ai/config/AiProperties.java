@@ -15,6 +15,8 @@ public class AiProperties {
     private boolean ingestOnStartup = true;
     private int chunkSizeChars = 2000;
     private int chunkOverlapChars = 200;
+    private String correlationBaseUrl = "http://localhost:8082";
+    private String riskBaseUrl = "http://localhost:8083";
 
     public boolean isDemoMode() {
         return demoMode;
@@ -94,5 +96,21 @@ public class AiProperties {
 
     public void setChunkOverlapChars(int chunkOverlapChars) {
         this.chunkOverlapChars = chunkOverlapChars;
+    }
+
+    public String getCorrelationBaseUrl() {
+        return correlationBaseUrl;
+    }
+
+    public void setCorrelationBaseUrl(String correlationBaseUrl) {
+        this.correlationBaseUrl = correlationBaseUrl;
+    }
+
+    public String getRiskBaseUrl() {
+        return riskBaseUrl;
+    }
+
+    public void setRiskBaseUrl(String riskBaseUrl) {
+        this.riskBaseUrl = riskBaseUrl;
     }
 }

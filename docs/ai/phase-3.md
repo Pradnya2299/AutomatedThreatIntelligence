@@ -35,7 +35,7 @@ Optional cache `ai:remediation:{findingId}:{riskId}` TTL 1h. PostgreSQL is the s
 
 Consumer `ai-service:risk.calculated` on `event_processing_records`. Unique index on `remediation_plans (finding_id, risk_assessment_id)`. Existing **GENERATED** plans skip a new OpenAI/demo call.
 
-## Local demo
+Phase 5A reuses this generator from `RemediationAgent` / `RemediationGenerationTool`. See [phase-5.md](phase-5.md).
 
 ```bash
 ./scripts/migrate.sh   # includes V6

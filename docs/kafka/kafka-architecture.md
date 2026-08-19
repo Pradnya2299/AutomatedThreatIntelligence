@@ -24,6 +24,8 @@ Kafka UI: http://localhost:8088
 | risk.calculated | risk-service | ai-service, notification-service |
 | remediation.requested | ai-service or api-service | ai-service |
 | remediation.generated | ai-service | notification-service, api-service (read model) |
+| security.investigation.requested | api-service or operators (optional) | ai-service |
+| security.investigation.completed | ai-service | notification-service, api-service (later) |
 | notification.requested | any | notification-service |
 | remediation.approved | api-service | notification-service, future executor |
 | remediation.completed | future executor / simulation | notification-service, api-service |

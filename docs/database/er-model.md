@@ -20,6 +20,7 @@ erDiagram
 
   findings ||--|| risk_assessments : scored_as
   findings ||--o{ remediation_plans : planned_for
+  vulnerabilities ||--o{ security_investigations : investigated_as
 
   knowledge_documents ||--o{ knowledge_chunks : split_into
 

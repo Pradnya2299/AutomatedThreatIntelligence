@@ -22,6 +22,7 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 | risk_assessments | Deterministic scores + reason list |
 | remediation_plans | AI (later) + approval workflow |
 | knowledge_documents / knowledge_chunks | RAG corpus + embeddings |
+| security_investigations | Phase 5A multi-agent CVE investigation snapshots |
 | notifications | Outbound notification records |
 | audit_logs | Security-relevant actions |
 | event_processing_records | Consumer idempotency |
@@ -50,6 +51,10 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 - `findings (asset_id, vulnerability_id)`
 - `event_processing_records.event_id` unique
 - `risk_assessments` one current row per finding (`finding_id` unique in V1)
+
+## Investigations (Phase 5A, V7)
+
+`security_investigations` stores orchestrator state: status, per-agent JSON results, executions, errors, evidence, recommendation, timestamps. JSON is typed snapshots, not an LLM scratchpad.
 
 ## Flyway vs services
 

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -24,6 +25,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<Map<String, Object>> api(ApiException ex) {
         return ResponseEntity.status(ex.getStatus()).body(error(ex.getCode(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> validation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(err -> err.getField() + " " + err.getDefaultMessage())
+                .orElse("Invalid request");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error("VALIDATION_ERROR", message));
     }
 
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})

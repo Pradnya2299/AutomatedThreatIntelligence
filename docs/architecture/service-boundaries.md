@@ -6,7 +6,7 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 **Owns:** synchronous SecOps API, authentication/authorization, dashboard aggregations, human approval/rejection of remediation, triggering manual CVE ingestion, **Flyway schema application** (only migrator).
 
-**Does:** REST for `/api/*`, Spring Security roles, audit of user actions, publish `cve.raw` (when an analyst submits a CVE) and `remediation.approved`.
+**Does:** REST for `/api/*` including dashboard BFF and `POST/GET /api/v1/investigations` (proxy to ai-service). Spring Security roles, audit of user actions, publish `cve.raw` (when an analyst submits a CVE) and `remediation.approved`.
 
 **Does not:** normalize NVD feeds, run correlation, compute risk formulas, call OpenAI, send emails/Slack.
 
@@ -46,7 +46,7 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 ## ai-service
 
-**Owns:** RAG over `knowledge_chunks`, structured OpenAI (or demo) remediation, `remediation_plans` status GENERATED, publish `remediation.generated`.
+**Owns:** RAG over `knowledge_chunks`, structured OpenAI (or demo) remediation, `remediation_plans` status GENERATED, publish `remediation.generated`, Phase 5A multi-agent investigation (`security_investigations`, `security.investigation.*`).
 
 **Does not:** decide vulnerability or risk; execute patches; approve work; persist invalid JSON; log API keys.
 

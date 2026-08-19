@@ -19,4 +19,6 @@ public record EventEnvelope(
     public static final String SOURCE_SERVICE = "ai-service";
     public static final String TYPE_RISK_CALCULATED = "risk.calculated";
     public static final String TYPE_REMEDIATION_GENERATED = "remediation.generated";
+    public static final String TYPE_INVESTIGATION_REQUESTED = "security.investigation.requested";
+    public static final String TYPE_INVESTIGATION_COMPLETED = "security.investigation.completed";
 }
