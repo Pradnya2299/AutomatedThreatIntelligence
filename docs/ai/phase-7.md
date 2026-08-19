@@ -89,6 +89,7 @@ After V9 (`./scripts/migrate.sh` or start api-service) and seed:
 2. Dashboard → Autonomous remediation → pick an example:
    - **Maven Log4j** — `pom.xml` `log4j-core` `2.14.1` → `2.17.1`
    - **Docker base image** — `Dockerfile` `FROM openjdk:8u222-jdk` → `eclipse-temurin:17-jre`
+   - **Insecure hash** — `InsecureHash.java` `MD5` → `SHA-256`
    - **Cannot safely fix** — empty repo → `REVIEW_REQUIRED`, no patch, no PR
 3. Security verification is `PATCH_NOT_VERIFIED` when host tests are skipped (`AI_SKIP_HOST_BUILDS=true`).
 4. Approve does **not** push if GitHub is disabled.
@@ -107,6 +108,24 @@ Root `Dockerfile`:
 FROM openjdk:8u222-jdk
 WORKDIR /app
 COPY . .
+```
+
+**Example C — Java source (insecure hash)**
+
+Keep this path exactly (the analyzer only scans this file):
+
+`src/main/java/com/northwind/InsecureHash.java`
+
+```java
+package com.northwind;
+
+import java.security.MessageDigest;
+
+public class InsecureHash {
+    public static byte[] digest(byte[] input) throws Exception {
+        return MessageDigest.getInstance("MD5").digest(input);
+    }
+}
 ```
 
 ## Environment

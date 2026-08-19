@@ -17,7 +17,7 @@ import type { CodeRemediation } from '@/types/codeRemediation'
 export function AutonomousRemediationPanel({ investigation }: { investigation: Investigation }) {
   const queryClient = useQueryClient()
   const [showDiff, setShowDiff] = useState(true)
-  const [example, setExample] = useState<'mapped' | 'maven' | 'docker' | 'empty'>('mapped')
+  const [example, setExample] = useState<'mapped' | 'maven' | 'docker' | 'source' | 'empty'>('mapped')
   const query = useQuery({
     queryKey: ['code-remediation', investigation.investigationId],
     queryFn: async () => {
@@ -86,7 +86,8 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
       {!job && !query.isLoading ? (
         <div className="space-y-3">
           <p className="text-sm text-slate-300">
-            Pick a demo target. Maven Log4j and Docker are isolated fixture workspaces. Empty shows REVIEW_REQUIRED.
+            Pick a demo target. Maven, Docker, and source-hash are isolated fixture workspaces. Empty shows
+            REVIEW_REQUIRED.
           </p>
           <label className="block text-xs text-slate-500">
             Example
@@ -98,6 +99,7 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
               <option value="mapped">Mapped asset repo (seed / GitHub binding)</option>
               <option value="maven">Example: Maven Log4j (pom.xml)</option>
               <option value="docker">Example: Docker base image (Dockerfile)</option>
+              <option value="source">Example: insecure hash (Java source)</option>
               <option value="empty">Example: cannot safely fix</option>
             </select>
           </label>
@@ -211,7 +213,7 @@ function JobView({
   )
 }
 
-function startBody(example: 'mapped' | 'maven' | 'docker' | 'empty'): Record<string, string> {
+function startBody(example: 'mapped' | 'maven' | 'docker' | 'source' | 'empty'): Record<string, string> {
   if (example === 'maven') {
     return {
       initiatedBy: 'analyst',
@@ -227,6 +229,15 @@ function startBody(example: 'mapped' | 'maven' | 'docker' | 'empty'): Record<str
       provider: 'LOCAL_WORKSPACE',
       repository: 'container-service',
       repositoryUrl: 'local://container-service',
+      defaultBranch: 'main',
+    }
+  }
+  if (example === 'source') {
+    return {
+      initiatedBy: 'analyst',
+      provider: 'LOCAL_WORKSPACE',
+      repository: 'source-service',
+      repositoryUrl: 'local://source-service',
       defaultBranch: 'main',
     }
   }

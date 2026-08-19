@@ -181,6 +181,23 @@ class CodeRemediationServiceTest {
     }
 
     @Test
+    void sourceFixtureProducesHashAlgorithmPatch() {
+        UUID investigationId = UUID.randomUUID();
+        when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId)));
+        CodeRemediationResponse response = service.start(
+                investigationId,
+                new CodeRemediationRequest("analyst", "LOCAL_WORKSPACE", "northwind", "source-service",
+                        "local://source-service", "main"),
+                "analyst");
+        assertEquals("AWAITING_APPROVAL", response.currentState());
+        assertEquals("SOURCE_CODE_CHANGE", response.strategy().strategyType().name());
+        assertNotNull(response.patch());
+        assertTrue(response.patch().unifiedDiff().contains("MD5"));
+        assertTrue(response.patch().unifiedDiff().contains("SHA-256"));
+        assertEquals("PASSED", response.patch().safetyStatus());
+    }
+
+    @Test
     void emptyRepositoryIsReviewRequired() {
         UUID investigationId = UUID.randomUUID();
         when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId)));
