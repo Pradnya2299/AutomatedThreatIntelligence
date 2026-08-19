@@ -2,7 +2,7 @@
 
 ## Canonical source
 
-**`database/migrations/` is the only authoritative schema history.**
+**`database/migrations/` is the only authoritative schema history.** Latest version: **V9** (`V9__code_remediation.sql`).
 
 `api-service` copies those files onto the classpath at Maven `generate-resources` (`target/classes/db/migration`). There are **no** checked-in copies under `api-service/src/main/resources/db/migration`. Generate-resources deletes stale `*.sql` copies first so leftover Phase 1 filenames cannot collide on version numbers.
 

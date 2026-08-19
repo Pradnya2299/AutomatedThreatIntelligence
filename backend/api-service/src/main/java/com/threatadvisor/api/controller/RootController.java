@@ -16,8 +16,8 @@ public class RootController {
     public Map<String, Object> root() {
         return Map.of(
                 "service", "api-service",
-                "phase", "5A",
-                "message", "SOC dashboard BFF plus CVE investigation orchestration proxy.",
+                "phase", "7",
+                "message", "SOC dashboard BFF: investigations plus human-approved code remediation.",
                 "public", List.of("GET /api/health", "GET /actuator/health"),
                 "authenticated", List.of(
                         "GET /api/me",
@@ -27,7 +27,11 @@ public class RootController {
                         "GET /api/assets",
                         "GET /api/remediation",
                         "POST /api/v1/investigations",
-                        "GET /api/v1/investigations/{id}")
+                        "GET /api/v1/investigations/{id}",
+                        "POST /api/v1/investigations/{id}/remediation",
+                        "GET /api/v1/investigations/{id}/remediation",
+                        "POST /api/v1/remediations/{id}/approve",
+                        "POST /api/v1/remediations/{id}/reject")
         );
     }
 }

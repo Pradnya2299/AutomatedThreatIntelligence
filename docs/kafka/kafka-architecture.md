@@ -26,6 +26,14 @@ Kafka UI: http://localhost:8088
 | remediation.generated | ai-service | notification-service, api-service (read model) |
 | security.investigation.requested | api-service or operators (optional) | ai-service |
 | security.investigation.completed | ai-service | notification-service, api-service (later) |
+| security.remediation.requested | api-service / ai-service | ai-service (lifecycle) |
+| security.remediation.planned | ai-service | audit consumers |
+| security.patch.generated | ai-service | audit consumers |
+| security.patch.validated | ai-service | audit consumers |
+| security.remediation.approval.requested | ai-service | dashboard / notification |
+| security.remediation.approved | ai-service | GitHub/PR path |
+| security.remediation.rejected | ai-service | audit |
+| security.pullrequest.created | ai-service | notification |
 | notification.requested | any | notification-service |
 | remediation.approved | api-service | notification-service, future executor |
 | remediation.completed | future executor / simulation | notification-service, api-service |

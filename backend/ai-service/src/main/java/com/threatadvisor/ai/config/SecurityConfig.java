@@ -22,7 +22,9 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/internal/ai/**",
                                 "/api/v1/investigations",
-                                "/api/v1/investigations/**").permitAll()
+                                "/api/v1/investigations/**",
+                                "/api/v1/remediations",
+                                "/api/v1/remediations/**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults());
         return http.build();

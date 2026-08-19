@@ -63,6 +63,16 @@ ai:
   correlation-base-url: ${CORRELATION_SERVICE_URL:http://localhost:8082}
   risk-base-url: ${RISK_SERVICE_URL:http://localhost:8083}
   max-agent-iterations: ${AI_MAX_AGENT_ITERATIONS:10}
+  git:
+    enabled: ${GITHUB_ENABLED:false}
+    api-url: ${GITHUB_API_URL:https://api.github.com}
+    token: ${GITHUB_TOKEN:}
+    organization: ${GITHUB_ORGANIZATION:}
+  code-remediation:
+    max-changed-files: ${AI_MAX_CHANGED_FILES:20}
+    max-changed-lines: ${AI_MAX_CHANGED_LINES:400}
+    max-patch-attempts: ${AI_MAX_PATCH_ATTEMPTS:3}
+    skip-host-builds: ${AI_SKIP_HOST_BUILDS:true}
 
 openai:
   api-key: ${OPENAI_API_KEY:}

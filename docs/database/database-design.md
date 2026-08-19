@@ -56,6 +56,10 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 
 `security_investigations` stores orchestrator state: status, per-agent JSON results, executions, errors, evidence, recommendation, timestamps. V8 adds `current_state`, `overall_confidence`, `iteration_count`, `decision_history`, `execution_trace`, `completed_agents`, and `pending_agents`. JSON is typed snapshots, not an LLM scratchpad.
 
+## Code remediation (Phase 7 V9)
+
+Separate from investigation JSON: `remediation_repository_bindings`, `code_remediation_jobs`, `remediation_targets`, `patch_plans`, `patch_executions`, `patch_changes`, `validation_runs`, `security_verifications`, `approval_requests`, `code_pull_requests`, `code_remediation_audit`.
+
 ## Flyway vs services
 
 **api-service** runs Flyway on startup (`spring.flyway.enabled=true`). Other services set Flyway off. Hibernate is `ddl-auto=validate` everywhere — never `create` / `update`.

@@ -37,7 +37,7 @@ React Query loads detail. If `status` is `RUNNING`/`PENDING`, the page polls eve
 | `/investigations/new` | CVE form → `POST /api/v1/investigations` |
 | `/investigations/:investigationId` | Full investigation |
 
-Phase 4 catalog screens remain under `/dashboard`, `/vulnerabilities`, `/findings`, `/assets`, `/remediation`.
+Phase 4 catalog screens remain under `/dashboard`, `/vulnerabilities`, `/findings`, `/assets`, `/remediation`. Phase 7 autonomous patching is on the investigation detail page (`AutonomousRemediationPanel`).
 
 There is **no** investigation list API. The UI does not fabricate a catalog. Session storage only remembers IDs the user opened.
 

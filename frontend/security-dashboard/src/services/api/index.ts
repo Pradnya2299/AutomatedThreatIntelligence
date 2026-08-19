@@ -1,5 +1,13 @@
 import { apiGet } from '@/services/api/client'
 export { getInvestigation, createInvestigation } from '@/services/api/investigations'
+export {
+  startCodeRemediation,
+  getCodeRemediationForInvestigation,
+  getCodeRemediation,
+  approveCodeRemediation,
+  rejectCodeRemediation,
+  requestCodeRemediationChanges,
+} from '@/services/api/codeRemediation'
 import type {
   AssetDetail,
   AssetListItem,

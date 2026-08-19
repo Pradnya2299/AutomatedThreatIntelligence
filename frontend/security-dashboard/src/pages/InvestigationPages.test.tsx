@@ -152,10 +152,16 @@ const completed: Investigation = {
 }
 
 function jsonOk(body: unknown) {
-  return vi.fn(async () => ({
-    ok: true,
-    json: async () => body,
-  }))
+  return vi.fn(async (input: RequestInfo) => {
+    const url = String(input)
+    if (url.includes('/remediation')) {
+      return { ok: false, status: 404, json: async () => ({ code: 'REMEDIATION_NOT_FOUND' }) }
+    }
+    return {
+      ok: true,
+      json: async () => body,
+    }
+  })
 }
 
 function jsonErr(status: number, body: unknown) {
@@ -193,7 +199,7 @@ describe('investigation pages', () => {
     expect(screen.getAllByText('nw-prod-app-01').length).toBeGreaterThan(0)
     expect(screen.getAllByText('97.5').length).toBeGreaterThan(0)
     expect(screen.getAllByText('[DEMO MODE] IMMEDIATE remediation for CVE-2021-44228').length).toBeGreaterThan(0)
-    expect(screen.queryByText('Human review required')).not.toBeInTheDocument()
+    expect(screen.getByText('Autonomous remediation')).toBeInTheDocument()
   })
 
   it('renders REVIEW_REQUIRED without a remediation card', async () => {

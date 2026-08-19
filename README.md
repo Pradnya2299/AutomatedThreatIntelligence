@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform. **Phase 6** adds the React SOC investigation dashboard on the Phase 5B multi-agent backend.
+This repository is a **multi-service, event-driven** platform. **Phase 7** adds human-approved autonomous code remediation on top of Phases 5B–6.
 
 ## Current phase
 
-**Phase 6 — React SOC investigation dashboard.** See [docs/frontend/phase-6.md](docs/frontend/phase-6.md).
+**Phase 7 — Autonomous code remediation & human-approved PRs.** See [docs/ai/phase-7.md](docs/ai/phase-7.md).
 
 ## Repository layout
 
@@ -136,6 +136,7 @@ npm run dev
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 7 autonomous code remediation](docs/ai/phase-7.md)
 - [Phase 6 SOC investigation dashboard](docs/frontend/phase-6.md)
 - [Phase 5B bounded agentic investigation](docs/ai/phase-5b.md)
 - [Phase 5A multi-agent investigation](docs/ai/phase-5.md)
@@ -148,7 +149,7 @@ npm run dev
 
 ## Next phase (recommended)
 
-Human review/approval of remediation plans (no autonomous execution).
+GitLab/Bitbucket providers, real host builds in CI sandboxes, and richer source-code repair.
 
 ## License
 

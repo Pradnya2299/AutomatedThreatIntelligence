@@ -174,3 +174,22 @@ INSERT INTO knowledge_chunks (id, document_id, chunk_index, content) VALUES
     ('91000000-0000-0000-0000-000000000002', '90000000-0000-0000-0000-000000000002', 0, 'Emergency patches for KEV items may skip standard CAB with Security Manager approval.'),
     ('91000000-0000-0000-0000-000000000003', '90000000-0000-0000-0000-000000000006', 0, 'Log4j 2.x must be >= 2.17.1. Dependency scanning is required in CI.')
 ON CONFLICT (id) DO NOTHING;
+
+-- Phase 7: explicit hostname → isolated fixture workspace (never guessed at runtime).
+INSERT INTO remediation_repository_bindings (
+    id, organization_id, asset_id, hostname, application_name, provider, organization, repository,
+    repository_url, default_branch, technology, build_system, confidence
+) VALUES
+    ('d0000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-000000000003', 'nw-prod-app-01', 'payment-service',
+     'LOCAL_WORKSPACE', 'northwind', 'payment-service', 'local://payment-service', 'main',
+     'java', 'maven', 'HIGH'),
+    ('d0000000-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-000000000004', 'nw-prod-app-02', 'payment-service',
+     'LOCAL_WORKSPACE', 'northwind', 'payment-service', 'local://payment-service', 'main',
+     'java', 'maven', 'HIGH')
+ON CONFLICT (id) DO NOTHING;
+
+UPDATE assets
+SET metadata = COALESCE(metadata, '{}'::jsonb) || '{"repositoryUrl":"local://payment-service","repository":"payment-service","provider":"LOCAL_WORKSPACE"}'::jsonb
+WHERE id IN ('c0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000004');

@@ -42,6 +42,14 @@ create_topic "remediation.approved" 1
 create_topic "remediation.completed" 1
 create_topic "security.investigation.requested" 3
 create_topic "security.investigation.completed" 3
+create_topic "security.remediation.requested" 3
+create_topic "security.remediation.planned" 3
+create_topic "security.patch.generated" 3
+create_topic "security.patch.validated" 3
+create_topic "security.remediation.approval.requested" 3
+create_topic "security.remediation.approved" 3
+create_topic "security.remediation.rejected" 3
+create_topic "security.pullrequest.created" 3
 
 create_topic "cve.raw.dlq" 1
 create_topic "cve.normalized.dlq" 1
@@ -54,6 +62,14 @@ create_topic "notification.requested.dlq" 1
 create_topic "remediation.approved.dlq" 1
 create_topic "security.investigation.requested.dlq" 1
 create_topic "security.investigation.completed.dlq" 1
+create_topic "security.remediation.requested.dlq" 1
+create_topic "security.remediation.planned.dlq" 1
+create_topic "security.patch.generated.dlq" 1
+create_topic "security.patch.validated.dlq" 1
+create_topic "security.remediation.approval.requested.dlq" 1
+create_topic "security.remediation.approved.dlq" 1
+create_topic "security.remediation.rejected.dlq" 1
+create_topic "security.pullrequest.created.dlq" 1
 
 echo "Kafka topics:"
 /opt/kafka/bin/kafka-topics.sh --bootstrap-server "${BOOTSTRAP}" --list

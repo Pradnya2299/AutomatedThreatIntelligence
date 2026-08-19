@@ -8,6 +8,7 @@ import { DecisionTimeline } from '@/components/DecisionTimeline'
 import { EvidencePanel } from '@/components/EvidencePanel'
 import { AssetTable } from '@/components/AssetTable'
 import { RemediationPanel } from '@/components/RemediationPanel'
+import { AutonomousRemediationPanel } from '@/components/AutonomousRemediationPanel'
 import { HumanReviewBanner } from '@/components/HumanReviewBanner'
 import { FactsVsAi } from '@/components/FactsVsAi'
 import { ErrorState, LoadingState } from '@/components/LoadingState'
@@ -87,6 +88,7 @@ export function InvestigationDetailPage() {
       <EvidencePanel investigation={investigation} />
       <AssetTable investigation={investigation} />
       {showRemediation ? <RemediationPanel investigation={investigation} /> : null}
+      <AutonomousRemediationPanel investigation={investigation} />
     </div>
   )
 }

@@ -22,6 +22,8 @@ public class AiProperties {
      * {@code REVIEW_REQUIRED} rather than an infinite agent loop.
      */
     private int maxAgentIterations = 10;
+    private Git git = new Git();
+    private CodeRemediation codeRemediation = new CodeRemediation();
 
     public boolean isDemoMode() {
         return demoMode;
@@ -125,5 +127,53 @@ public class AiProperties {
 
     public void setMaxAgentIterations(int maxAgentIterations) {
         this.maxAgentIterations = maxAgentIterations;
+    }
+
+    public Git getGit() {
+        return git;
+    }
+
+    public void setGit(Git git) {
+        this.git = git;
+    }
+
+    public CodeRemediation getCodeRemediation() {
+        return codeRemediation;
+    }
+
+    public void setCodeRemediation(CodeRemediation codeRemediation) {
+        this.codeRemediation = codeRemediation;
+    }
+
+    public static class Git {
+        private boolean enabled = false;
+        private String apiUrl = "https://api.github.com";
+        private String token = "";
+        private String organization = "";
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public String getApiUrl() { return apiUrl; }
+        public void setApiUrl(String apiUrl) { this.apiUrl = apiUrl; }
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+        public String getOrganization() { return organization; }
+        public void setOrganization(String organization) { this.organization = organization; }
+    }
+
+    public static class CodeRemediation {
+        private int maxChangedFiles = 20;
+        private int maxChangedLines = 400;
+        private int maxPatchAttempts = 3;
+        private boolean skipHostBuilds = true;
+
+        public int getMaxChangedFiles() { return maxChangedFiles; }
+        public void setMaxChangedFiles(int maxChangedFiles) { this.maxChangedFiles = maxChangedFiles; }
+        public int getMaxChangedLines() { return maxChangedLines; }
+        public void setMaxChangedLines(int maxChangedLines) { this.maxChangedLines = maxChangedLines; }
+        public int getMaxPatchAttempts() { return maxPatchAttempts; }
+        public void setMaxPatchAttempts(int maxPatchAttempts) { this.maxPatchAttempts = maxPatchAttempts; }
+        public boolean isSkipHostBuilds() { return skipHostBuilds; }
+        public void setSkipHostBuilds(boolean skipHostBuilds) { this.skipHostBuilds = skipHostBuilds; }
     }
 }
