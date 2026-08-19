@@ -59,4 +59,11 @@ class InvestigationControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("INVESTIGATION_NOT_FOUND"));
     }
+
+    @Test
+    void getRejectsInvalidId() throws Exception {
+        mockMvc.perform(get("/api/v1/investigations/{id}", "{investigationId}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
 }

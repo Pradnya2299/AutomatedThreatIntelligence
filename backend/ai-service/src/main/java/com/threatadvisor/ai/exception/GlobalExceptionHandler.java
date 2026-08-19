@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.Map;
@@ -36,6 +37,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                 "code", "VALIDATION_ERROR",
                 "message", message,
+                "correlationId", String.valueOf(MDC.get("correlationId")),
+                "timestamp", Instant.now().toString()
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "code", "VALIDATION_ERROR",
+                "message", "Invalid " + (ex.getName() == null ? "parameter" : ex.getName())
+                        + ". Use the investigationId UUID from the create response.",
                 "correlationId", String.valueOf(MDC.get("correlationId")),
                 "timestamp", Instant.now().toString()
         ));

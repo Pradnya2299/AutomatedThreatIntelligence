@@ -10,6 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -34,6 +35,15 @@ public class GlobalExceptionHandler {
                 .map(err -> err.getField() + " " + err.getDefaultMessage())
                 .orElse("Invalid request");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> typeMismatch(MethodArgumentTypeMismatchException ex) {
+        String name = ex.getName() == null ? "parameter" : ex.getName();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error(
+                "VALIDATION_ERROR",
+                "Invalid " + name + ". Use the investigationId UUID from POST /api/v1/investigations, not the {investigationId} placeholder."
+        ));
     }
 
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})

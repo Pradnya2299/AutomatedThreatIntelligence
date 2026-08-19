@@ -133,10 +133,17 @@ Phase 3 `RemediationPipelineTest` still covers RAG persistence with `AI_DEMO_MOD
 3. Trigger:
 
 ```bash
-curl -sS -u analyst:analyst_change_me -H 'Content-Type: application/json' \
+RESP=$(curl -sS -u analyst:analyst_change_me -H 'Content-Type: application/json' \
   -d '{"cveId":"CVE-2021-44228"}' \
-  http://localhost:8080/api/v1/investigations
+  http://localhost:8080/api/v1/investigations)
+echo "$RESP"
+ID=$(python -c "import json,sys; print(json.loads(sys.argv[1])['investigationId'])" "$RESP")
+# Git Bash: python may be `py`. Or paste the UUID from the JSON:
+curl -sS -u analyst:analyst_change_me \
+  "http://localhost:8080/api/v1/investigations/${ID}"
 ```
+
+Replace `{investigationId}` with the real UUID from POST (for example `79d24a36-4b6b-4dd5-beac-20ba7bb91be1`). Do not leave the curly-brace placeholder in the URL.
 
 Direct ai-service (no Basic auth): `http://localhost:8084/api/v1/investigations`.
 

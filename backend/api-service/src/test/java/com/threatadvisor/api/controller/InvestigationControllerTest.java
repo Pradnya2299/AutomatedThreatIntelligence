@@ -1,10 +1,12 @@
 package com.threatadvisor.api.controller;
 
 import com.threatadvisor.api.client.AiInvestigationClient;
+import com.threatadvisor.api.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = InvestigationController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@Import(GlobalExceptionHandler.class)
 class InvestigationControllerTest {
 
     @Autowired
@@ -51,5 +54,12 @@ class InvestigationControllerTest {
         mockMvc.perform(get("/api/v1/investigations/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.investigationId").value(id.toString()));
+    }
+
+    @Test
+    void getRejectsPlaceholderPath() throws Exception {
+        mockMvc.perform(get("/api/v1/investigations/{id}", "{investigationId}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 }
