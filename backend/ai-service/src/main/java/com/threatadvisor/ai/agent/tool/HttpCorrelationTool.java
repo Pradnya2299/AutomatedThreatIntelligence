@@ -21,10 +21,6 @@ public class HttpCorrelationTool implements CorrelationTool {
                 .build();
     }
 
-    HttpCorrelationTool(RestClient restClient) {
-        this.restClient = restClient;
-    }
-
     @Override
     public CorrelationToolResult correlate(String cveId, UUID correlationId) {
         try {

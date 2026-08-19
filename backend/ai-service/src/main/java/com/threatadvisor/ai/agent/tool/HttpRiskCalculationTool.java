@@ -32,12 +32,6 @@ public class HttpRiskCalculationTool implements RiskCalculationTool {
         this.objectMapper = objectMapper;
     }
 
-    HttpRiskCalculationTool(RestClient restClient, RiskAssessmentRepository assessments, ObjectMapper objectMapper) {
-        this.restClient = restClient;
-        this.assessments = assessments;
-        this.objectMapper = objectMapper;
-    }
-
     @Override
     public RiskEngineSnapshot calculate(UUID findingId, UUID correlationId) {
         RiskRunBody body;
