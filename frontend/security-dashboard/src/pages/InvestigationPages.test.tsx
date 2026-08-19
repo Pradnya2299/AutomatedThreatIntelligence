@@ -200,9 +200,15 @@ describe('investigation pages', () => {
     expect(screen.getAllByText('97.5').length).toBeGreaterThan(0)
     expect(screen.getAllByText('[DEMO MODE] IMMEDIATE remediation for CVE-2021-44228').length).toBeGreaterThan(0)
     expect(screen.getByText('Autonomous remediation')).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Example: Maven Log4j (pom.xml)' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Example: Docker base image (Dockerfile)' })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: 'Example: insecure hash (Java source)' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByLabelText('Example')).toBeInTheDocument())
+    const exampleSelect = screen.getByLabelText('Example') as HTMLSelectElement
+    expect([...exampleSelect.options].map((option) => option.value)).toEqual([
+      'mapped',
+      'maven',
+      'docker',
+      'source',
+      'empty',
+    ])
   })
 
   it('renders REVIEW_REQUIRED without a remediation card', async () => {
