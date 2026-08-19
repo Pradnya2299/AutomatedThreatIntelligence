@@ -12,7 +12,15 @@ const tones: Record<string, string> = {
   GENERATED: 'bg-[#102033] text-[#8ec5ff] border-[#1d3a5c]',
   OPEN: 'bg-[#102033] text-[#8ec5ff] border-[#1d3a5c]',
   FAILED: 'bg-[#3a1018] text-[#ff8da0] border-[#5c1d2a]',
+  COMPLETED: 'bg-[#102a22] text-[#7ee0c8] border-[#1d4a3c]',
+  REVIEW_REQUIRED: 'bg-[#3a2a10] text-[#f5c46b] border-[#5c4318]',
+  RUNNING: 'bg-[#102033] text-[#8ec5ff] border-[#1d3a5c]',
+  SKIPPED: 'bg-[#1a1f2a] text-slate-400 border-border',
+  DETERMINISTIC: 'bg-[#102a22] text-[#7ee0c8] border-[#1d4a3c]',
+  INTERPRETATION: 'bg-[#3a2a10] text-[#f5c46b] border-[#5c4318]',
   INTERNET: 'bg-[#3a1018] text-[#ff8da0] border-[#5c1d2a]',
+  'INTERNET-FACING': 'bg-[#3a1018] text-[#ff8da0] border-[#5c1d2a]',
+  INTERNAL: 'bg-[#102a22] text-[#7ee0c8] border-[#1d4a3c]',
 }
 
 export function Badge({ value, className, ...props }: { value?: string | null } & HTMLAttributes<HTMLSpanElement>) {

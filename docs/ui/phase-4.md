@@ -6,6 +6,9 @@ React talks **only** to api-service. HTTP Basic is attached by the Vite `/api` p
 
 | Path | Page |
 |------|------|
+| `/investigations` | Investigation dashboard (Phase 6) |
+| `/investigations/new` | Start CVE investigation |
+| `/investigations/:id` | Agent pipeline, decisions, evidence, risk, remediation |
 | `/dashboard` | KPIs, top CVEs, risk bars, activity |
 | `/vulnerabilities` | Searchable CVE table |
 | `/vulnerabilities/:cveId` | CVE detail, assets, AI plan |
@@ -17,4 +20,4 @@ React talks **only** to api-service. HTTP Basic is attached by the Vite `/api` p
 | `/remediation/:id` | Full plan |
 | `/settings` | Local auth notes |
 
-Approve/Review buttons are disabled (Phase 5).
+Approve/Review buttons are disabled (later approval phase). Investigation UX is Phase 6: [phase-6.md](../frontend/phase-6.md).

@@ -1,4 +1,5 @@
 import { apiGet } from '@/services/api/client'
+export { getInvestigation, createInvestigation } from '@/services/api/investigations'
 import type {
   AssetDetail,
   AssetListItem,

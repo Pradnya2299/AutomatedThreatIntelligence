@@ -10,6 +10,7 @@ describe('navigation', () => {
         <AppShell />
       </MemoryRouter>,
     )
+    expect(screen.getByRole('link', { name: 'Investigations' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Vulnerabilities' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Findings' })).toBeInTheDocument()

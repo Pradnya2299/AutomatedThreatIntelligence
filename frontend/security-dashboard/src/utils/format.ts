@@ -15,3 +15,10 @@ export function formatScore(value: number | null | undefined): string {
   }
   return Number(value).toFixed(1)
 }
+
+export function formatScoreOrUnavailable(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return 'Not available'
+  }
+  return Number(value).toFixed(1)
+}

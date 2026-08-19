@@ -1,7 +1,8 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutDashboard, Bug, FileSearch, Server, Shield, Settings } from 'lucide-react'
+import { LayoutDashboard, Bug, FileSearch, Server, Shield, Settings, GitBranch } from 'lucide-react'
 
 const links = [
+  { to: '/investigations', label: 'Investigations', icon: GitBranch },
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/vulnerabilities', label: 'Vulnerabilities', icon: Bug },
   { to: '/findings', label: 'Findings', icon: FileSearch },
@@ -35,7 +36,7 @@ export function AppShell() {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-8 py-3">
-          <p className="text-sm text-slate-400">CVE → Finding → Risk → AI remediation</p>
+          <p className="text-sm text-slate-400">CVE → Orchestrator → Agents → Recommendation</p>
           <p className="text-xs uppercase tracking-wide text-slate-500">Local · analyst via API proxy</p>
         </header>
         <main className="flex-1 overflow-auto p-8">

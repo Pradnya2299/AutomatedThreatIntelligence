@@ -10,12 +10,18 @@ import { FindingDetailPage } from '@/pages/FindingDetailPage'
 import { RemediationPage } from '@/pages/RemediationPage'
 import { RemediationDetailPage } from '@/pages/RemediationDetailPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { InvestigationListPage } from '@/pages/InvestigationListPage'
+import { NewInvestigationPage } from '@/pages/NewInvestigationPage'
+import { InvestigationDetailPage } from '@/pages/InvestigationDetailPage'
 
 export default function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/investigations" replace />} />
+        <Route path="/investigations" element={<InvestigationListPage />} />
+        <Route path="/investigations/new" element={<NewInvestigationPage />} />
+        <Route path="/investigations/:investigationId" element={<InvestigationDetailPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/vulnerabilities" element={<VulnerabilitiesPage />} />
         <Route path="/vulnerabilities/:cveId" element={<VulnerabilityDetailPage />} />

@@ -129,5 +129,6 @@ Kafka auto-configuration is enabled on **ingestion-service** for `cve.raw` / `cv
 4. **Phase 2D:** deterministic risk on `finding.created` → `risk.calculated` (done).
 5. **Phase 3 (this branch):** RAG + structured remediation on `risk.calculated` (done). No dashboard.
 6. **Phase 4 — API + dashboard:** REST DTOs, authn/z, screens bound to real data (done).
-7. **Phase 5A/5B — multi-agent investigation:** orchestrator + bounded planner + tools on existing engines (this branch).
-8. **Later:** approval UX, E2E hardening, DLQ processors, metrics, images.
+7. **Phase 5A/5B — multi-agent investigation:** orchestrator + bounded planner + tools on existing engines (done).
+8. **Phase 6 — React investigation dashboard:** agent pipeline, decisions, evidence on api-service (this branch).
+9. **Later:** approval UX, E2E hardening, DLQ processors, metrics, images.

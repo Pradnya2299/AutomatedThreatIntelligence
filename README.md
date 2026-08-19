@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform. **Phase 5B** adds bounded agentic investigation on top of the Phase 5A multi-agent workflow and Phase 4 SOC dashboard.
+This repository is a **multi-service, event-driven** platform. **Phase 6** adds the React SOC investigation dashboard on the Phase 5B multi-agent backend.
 
 ## Current phase
 
-**Phase 5B — bounded agentic orchestration.** See [docs/ai/phase-5b.md](docs/ai/phase-5b.md) and [docs/ai/phase-5.md](docs/ai/phase-5.md).
+**Phase 6 — React SOC investigation dashboard.** See [docs/frontend/phase-6.md](docs/frontend/phase-6.md).
 
 ## Repository layout
 
@@ -106,7 +106,7 @@ npm install
 npm run dev
 ```
 
-Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080 with local HTTP Basic).
+Dashboard: http://localhost:5173 (proxies `/api` to api-service on 8080 with local HTTP Basic). Default route is `/investigations`.
 
 ```bash
 cd frontend/security-dashboard
@@ -136,6 +136,7 @@ npm run dev
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 6 SOC investigation dashboard](docs/frontend/phase-6.md)
 - [Phase 5B bounded agentic investigation](docs/ai/phase-5b.md)
 - [Phase 5A multi-agent investigation](docs/ai/phase-5.md)
 - [Phase 4 dashboard](docs/ui/phase-4.md)
@@ -147,7 +148,7 @@ npm run dev
 
 ## Next phase (recommended)
 
-Human review/approval of remediation plans (no autonomous execution), plus a dashboard investigation screen.
+Human review/approval of remediation plans (no autonomous execution).
 
 ## License
 

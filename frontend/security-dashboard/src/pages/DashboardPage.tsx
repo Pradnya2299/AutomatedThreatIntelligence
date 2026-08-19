@@ -52,6 +52,11 @@ export function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold text-white">Operations dashboard</h1>
           <p className="mt-1 text-sm text-slate-400">Live inventory, findings, risk, and AI plans from api-service.</p>
+          <p className="mt-1 text-sm">
+            <Link to="/investigations" className="text-accent underline">
+              Multi-agent investigations
+            </Link>
+          </p>
         </div>
         <Button type="button" onClick={() => void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })}>
           Refresh
