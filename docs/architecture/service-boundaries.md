@@ -46,7 +46,7 @@ Each backend module is a **separate Spring Boot application**. Responsibilities 
 
 ## ai-service
 
-**Owns:** RAG over `knowledge_chunks`, structured OpenAI (or demo) remediation, `remediation_plans` status GENERATED, publish `remediation.generated`, Phase 5A multi-agent investigation (`security_investigations`, `security.investigation.*`).
+**Owns:** RAG over `knowledge_chunks`, structured OpenAI (or demo) remediation, `remediation_plans` status GENERATED, publish `remediation.generated`, Phase 5 multi-agent investigation (`security_investigations`, `security.investigation.*`).
 
 **Does not:** decide vulnerability or risk; execute patches; approve work; persist invalid JSON; log API keys.
 

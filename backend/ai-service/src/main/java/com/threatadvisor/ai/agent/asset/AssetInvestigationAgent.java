@@ -1,6 +1,10 @@
 package com.threatadvisor.ai.agent.asset;
 
 import com.threatadvisor.ai.agent.common.AgentToolException;
+import com.threatadvisor.ai.agent.common.Confidence;
+import com.threatadvisor.ai.agent.common.EvidenceItem;
+import com.threatadvisor.ai.agent.common.EvidenceSource;
+import com.threatadvisor.ai.agent.common.InvestigationConfidence;
 import com.threatadvisor.ai.agent.common.SecurityAgent;
 import com.threatadvisor.ai.agent.common.SecurityInvestigationContext;
 import com.threatadvisor.ai.agent.dto.AffectedAssetMatch;
@@ -10,6 +14,7 @@ import com.threatadvisor.ai.agent.tool.AffectedAssetLookupTool;
 import com.threatadvisor.ai.agent.tool.CorrelationTool;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,7 +52,35 @@ public class AssetInvestigationAgent implements SecurityAgent {
                 correlation.findingsUpdated(),
                 correlation.matchesEvaluated(),
                 assets,
-                reasons);
-        return context.withAssets(result);
+                reasons,
+                null,
+                false);
+        Confidence confidence = InvestigationConfidence.assets(result);
+        result = new AssetInvestigationResult(
+                result.affected(),
+                result.affectedAssetCount(),
+                result.findingsCreated(),
+                result.findingsUpdated(),
+                result.matchesEvaluated(),
+                result.assets(),
+                result.matchReasons(),
+                confidence,
+                false);
+        List<EvidenceItem> evidence = new ArrayList<>();
+        evidence.add(EvidenceItem.fact(
+                EvidenceSource.CORRELATION_ENGINE,
+                "correlation_run",
+                "Deterministic correlation against asset_software",
+                "matchesEvaluated=" + correlation.matchesEvaluated() + ", affected=" + result.affected(),
+                confidence));
+        for (AffectedAssetMatch match : assets) {
+            evidence.add(EvidenceItem.fact(
+                    EvidenceSource.CORRELATION_ENGINE,
+                    match.matchType() == null ? "match" : match.matchType(),
+                    match.matchReason(),
+                    match.hostname(),
+                    "HIGH".equalsIgnoreCase(match.matchConfidence()) ? Confidence.HIGH : Confidence.MEDIUM));
+        }
+        return context.withAssets(result).toBuilder().addEvidenceAll(evidence).build();
     }
 }

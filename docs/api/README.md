@@ -19,7 +19,7 @@ The dashboard talks **only** to **api-service** (default `http://localhost:8080`
 | GET | `/api/remediation` | HTTP Basic | Paged AI plans |
 | GET | `/api/remediation/{id}` | HTTP Basic | Full structured plan |
 | POST | `/api/v1/investigations` | HTTP Basic | Run multi-agent CVE investigation (proxied to ai-service) |
-| GET | `/api/v1/investigations/{id}` | HTTP Basic | Investigation state and agent results |
+| GET | `/api/v1/investigations/{id}` | HTTP Basic | Investigation state, evidence, decision history, execution trace |
 | GET | `/actuator/health` | public | Actuator |
 
 List responses: `{ content, page, size, totalElements, totalPages }`.

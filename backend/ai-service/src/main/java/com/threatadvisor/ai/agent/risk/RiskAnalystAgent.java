@@ -64,7 +64,14 @@ public class RiskAnalystAgent implements SecurityAgent {
                 primary.riskLevel(),
                 primary.factors(),
                 explanation,
-                List.copyOf(scores));
-        return context.withRisk(result);
+                List.copyOf(scores),
+                com.threatadvisor.ai.agent.common.Confidence.HIGH);
+        return context.withRisk(result)
+                .withEvidenceItem(com.threatadvisor.ai.agent.common.EvidenceItem.fact(
+                        com.threatadvisor.ai.agent.common.EvidenceSource.RISK_ENGINE,
+                        "risk_score",
+                        "Deterministic risk engine v1",
+                        primary.riskScore() + " " + primary.riskLevel(),
+                        com.threatadvisor.ai.agent.common.Confidence.HIGH));
     }
 }

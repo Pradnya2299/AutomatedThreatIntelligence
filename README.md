@@ -2,11 +2,11 @@
 
 AI-driven vulnerability intelligence and remediation orchestration for SecOps.
 
-This repository is a **multi-service, event-driven** platform. **Phase 5A** adds multi-agent CVE investigation on top of the Phase 4 SOC dashboard.
+This repository is a **multi-service, event-driven** platform. **Phase 5B** adds bounded agentic investigation on top of the Phase 5A multi-agent workflow and Phase 4 SOC dashboard.
 
 ## Current phase
 
-**Phase 5A — Multi-agent security orchestration.** See [docs/ai/phase-5.md](docs/ai/phase-5.md).
+**Phase 5B — bounded agentic orchestration.** See [docs/ai/phase-5b.md](docs/ai/phase-5b.md) and [docs/ai/phase-5.md](docs/ai/phase-5.md).
 
 ## Repository layout
 
@@ -136,6 +136,7 @@ npm run dev
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 5B bounded agentic investigation](docs/ai/phase-5b.md)
 - [Phase 5A multi-agent investigation](docs/ai/phase-5.md)
 - [Phase 4 dashboard](docs/ui/phase-4.md)
 - [Phase 3 AI](docs/ai/phase-3.md)

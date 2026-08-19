@@ -2,7 +2,11 @@ package com.threatadvisor.ai.dto;
 
 import com.threatadvisor.ai.agent.common.AgentError;
 import com.threatadvisor.ai.agent.common.AgentExecution;
+import com.threatadvisor.ai.agent.common.Confidence;
+import com.threatadvisor.ai.agent.common.DecisionRecord;
 import com.threatadvisor.ai.agent.common.EvidenceItem;
+import com.threatadvisor.ai.agent.common.ExecutionTraceEntry;
+import com.threatadvisor.ai.agent.common.InvestigationState;
 import com.threatadvisor.ai.agent.common.InvestigationStatus;
 import com.threatadvisor.ai.agent.common.SecurityInvestigationContext;
 import com.threatadvisor.ai.agent.dto.AssetInvestigationResult;
@@ -29,7 +33,11 @@ public record InvestigationResponse(
         FinalRecommendation recommendation,
         List<AgentExecution> executions,
         List<AgentError> errors,
-        List<EvidenceItem> evidence
+        List<EvidenceItem> evidence,
+        InvestigationState currentState,
+        Confidence confidence,
+        List<DecisionRecord> decisionHistory,
+        List<ExecutionTraceEntry> executionTrace
 ) {
     public static InvestigationResponse from(SecurityInvestigationContext context) {
         return new InvestigationResponse(
@@ -46,6 +54,10 @@ public record InvestigationResponse(
                 context.recommendation(),
                 context.executions(),
                 context.errors(),
-                context.evidence());
+                context.evidence(),
+                context.currentState(),
+                context.overallConfidence(),
+                context.decisionHistory(),
+                context.executionTrace());
     }
 }

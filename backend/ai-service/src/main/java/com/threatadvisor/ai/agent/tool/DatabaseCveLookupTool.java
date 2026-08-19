@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-public class DatabaseCveLookupTool implements CveLookupTool {
+public class DatabaseCveLookupTool implements CveLookupTool, CpeLookupTool {
 
     private final VulnerabilityRepository vulnerabilities;
     private final VulnerabilityCpeRepository cpes;
@@ -32,5 +32,10 @@ public class DatabaseCveLookupTool implements CveLookupTool {
     @Override
     public List<VulnerabilityCpe> findCpes(UUID vulnerabilityId) {
         return cpes.findByVulnerabilityId(vulnerabilityId);
+    }
+
+    @Override
+    public List<VulnerabilityCpe> lookupCpes(UUID vulnerabilityId) {
+        return findCpes(vulnerabilityId);
     }
 }

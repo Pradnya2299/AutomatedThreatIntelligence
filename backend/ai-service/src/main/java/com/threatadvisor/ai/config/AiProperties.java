@@ -17,6 +17,11 @@ public class AiProperties {
     private int chunkOverlapChars = 200;
     private String correlationBaseUrl = "http://localhost:8082";
     private String riskBaseUrl = "http://localhost:8083";
+    /**
+     * Maximum orchestrator loop iterations (Phase 5B). Reaching the cap yields
+     * {@code REVIEW_REQUIRED} rather than an infinite agent loop.
+     */
+    private int maxAgentIterations = 10;
 
     public boolean isDemoMode() {
         return demoMode;
@@ -112,5 +117,13 @@ public class AiProperties {
 
     public void setRiskBaseUrl(String riskBaseUrl) {
         this.riskBaseUrl = riskBaseUrl;
+    }
+
+    public int getMaxAgentIterations() {
+        return maxAgentIterations;
+    }
+
+    public void setMaxAgentIterations(int maxAgentIterations) {
+        this.maxAgentIterations = maxAgentIterations;
     }
 }

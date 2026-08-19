@@ -5,13 +5,14 @@ import com.threatadvisor.ai.agent.common.AgentToolException;
 import com.threatadvisor.ai.agent.common.InvestigationStatus;
 import com.threatadvisor.ai.agent.common.SecurityInvestigationContext;
 import com.threatadvisor.ai.agent.dto.ThreatIntelligenceResult;
+import com.threatadvisor.ai.agent.tool.CpeLookupTool;
 import com.threatadvisor.ai.agent.tool.CveLookupTool;
 import com.threatadvisor.ai.agent.tool.VulnerabilityContextTool;
 import com.threatadvisor.ai.domain.Vulnerability;
 import com.threatadvisor.ai.domain.VulnerabilityCpe;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -34,15 +35,22 @@ class ThreatIntelligenceAgentTest {
     @Mock
     private CveLookupTool cveLookupTool;
     @Mock
+    private CpeLookupTool cpeLookupTool;
+    @Mock
     private VulnerabilityContextTool contextTool;
-    @InjectMocks
+
     private ThreatIntelligenceAgent agent;
+
+    @BeforeEach
+    void setUp() {
+        agent = new ThreatIntelligenceAgent(cveLookupTool, cpeLookupTool, contextTool);
+    }
 
     @Test
     void usesCveLookupAndDoesNotInventExploitation() {
         Vulnerability vulnerability = vulnerability("CVE-2021-44228");
         when(cveLookupTool.findByCveId("CVE-2021-44228")).thenReturn(Optional.of(vulnerability));
-        when(cveLookupTool.findCpes(vulnerability.getId())).thenReturn(List.of(cpe(vulnerability.getId())));
+        when(cpeLookupTool.lookupCpes(vulnerability.getId())).thenReturn(List.of(cpe(vulnerability.getId())));
         when(contextTool.summarize(vulnerability)).thenReturn("deterministic summary");
 
         SecurityInvestigationContext result = agent.execute(baseContext());
@@ -54,7 +62,7 @@ class ThreatIntelligenceAgentTest {
         assertEquals("log4j", threat.affectedProducts().getFirst().product());
         assertEquals("deterministic summary", threat.summary());
         verify(cveLookupTool).findByCveId("CVE-2021-44228");
-        verify(cveLookupTool).findCpes(vulnerability.getId());
+        verify(cpeLookupTool).lookupCpes(vulnerability.getId());
     }
 
     @Test

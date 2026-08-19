@@ -30,7 +30,7 @@ Phase 1–4 pipelines stay in place: Kafka `cve.normalized` → findings → `ri
 
 `startInvestigation` → `runThreatAnalysis` → `runAssetInvestigation` → `runRiskAnalysis` → `runRemediation` → `buildFinalDecision`
 
-The orchestrator can become more autonomous later without changing tool boundaries.
+The orchestrator can become more autonomous later without changing tool boundaries. **Phase 5B** adds a bounded decision loop on top of this sequence; see [phase-5b.md](phase-5b.md). The Phase 5A order remains the default when evidence is complete.
 
 ## Agent responsibilities
 
@@ -149,8 +149,9 @@ Direct ai-service (no Basic auth): `http://localhost:8084/api/v1/investigations`
 
 ## Future extension points (not in 5A)
 
-- Autonomous planner / conditional agent fan-out
 - Jira, GitHub, ServiceNow, SIEM, cloud inventory
-- React investigation screen
+- React investigation screen (decision history / trace are API-ready in 5B)
 - Human approval execution (still a later phase)
 - LangChain/LangGraph — not required; Spring orchestration is enough
+
+Phase 5B bounded planner: [phase-5b.md](phase-5b.md).

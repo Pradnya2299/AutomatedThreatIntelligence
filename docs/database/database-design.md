@@ -52,9 +52,9 @@ Primary keys are UUID (`gen_random_uuid()`). Natural keys (CVE ID, hostname per 
 - `event_processing_records.event_id` unique
 - `risk_assessments` one current row per finding (`finding_id` unique in V1)
 
-## Investigations (Phase 5A, V7)
+## Investigations (Phase 5A V7, Phase 5B V8)
 
-`security_investigations` stores orchestrator state: status, per-agent JSON results, executions, errors, evidence, recommendation, timestamps. JSON is typed snapshots, not an LLM scratchpad.
+`security_investigations` stores orchestrator state: status, per-agent JSON results, executions, errors, evidence, recommendation, timestamps. V8 adds `current_state`, `overall_confidence`, `iteration_count`, `decision_history`, `execution_trace`, `completed_agents`, and `pending_agents`. JSON is typed snapshots, not an LLM scratchpad.
 
 ## Flyway vs services
 

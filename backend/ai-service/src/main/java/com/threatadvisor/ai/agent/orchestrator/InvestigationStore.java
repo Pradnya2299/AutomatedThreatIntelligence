@@ -5,7 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.threatadvisor.ai.agent.common.AgentError;
 import com.threatadvisor.ai.agent.common.AgentExecution;
+import com.threatadvisor.ai.agent.common.Confidence;
+import com.threatadvisor.ai.agent.common.DecisionRecord;
 import com.threatadvisor.ai.agent.common.EvidenceItem;
+import com.threatadvisor.ai.agent.common.ExecutionTraceEntry;
+import com.threatadvisor.ai.agent.common.InvestigationState;
 import com.threatadvisor.ai.agent.common.InvestigationStatus;
 import com.threatadvisor.ai.agent.common.SecurityInvestigationContext;
 import com.threatadvisor.ai.agent.dto.AssetInvestigationResult;
@@ -56,6 +60,15 @@ public class InvestigationStore {
         row.setErrors(write(context.errors(), EMPTY_ARRAY));
         row.setEvidence(write(context.evidence(), EMPTY_ARRAY));
         row.setRecommendation(write(context.recommendation(), EMPTY_OBJECT));
+        row.setCurrentState(context.currentState() == null
+                ? InvestigationState.INITIALIZED.name()
+                : context.currentState().name());
+        row.setOverallConfidence(context.overallConfidence() == null ? null : context.overallConfidence().name());
+        row.setIterationCount(context.iterationCount());
+        row.setDecisionHistory(write(context.decisionHistory(), EMPTY_ARRAY));
+        row.setExecutionTrace(write(context.executionTrace(), EMPTY_ARRAY));
+        row.setCompletedAgents(write(context.completedAgents(), EMPTY_ARRAY));
+        row.setPendingAgents(write(context.pendingAgents(), EMPTY_ARRAY));
         row.setUpdatedAt(now);
         row.setCompletedAt(context.completedAt());
         repository.save(row);
@@ -75,6 +88,9 @@ public class InvestigationStore {
                 .startedAt(row.getCreatedAt())
                 .completedAt(row.getCompletedAt())
                 .status(InvestigationStatus.valueOf(row.getStatus()))
+                .currentState(parseState(row.getCurrentState()))
+                .overallConfidence(parseConfidence(row.getOverallConfidence()))
+                .iterationCount(row.getIterationCount())
                 .threat(read(row.getThreatResult(), ThreatIntelligenceResult.class))
                 .assets(read(row.getAssetResult(), AssetInvestigationResult.class))
                 .risk(read(row.getRiskResult(), RiskAnalystResult.class))
@@ -83,6 +99,11 @@ public class InvestigationStore {
                 .replaceExecutionList(readList(row.getExecutions(), new TypeReference<List<AgentExecution>>() {}))
                 .replaceErrorList(readList(row.getErrors(), new TypeReference<List<AgentError>>() {}))
                 .replaceEvidenceList(readList(row.getEvidence(), new TypeReference<List<EvidenceItem>>() {}))
+                .replaceDecisionHistory(readList(row.getDecisionHistory(), new TypeReference<List<DecisionRecord>>() {}))
+                .replaceExecutionTrace(readList(row.getExecutionTrace(), new TypeReference<List<ExecutionTraceEntry>>() {}))
+                .replaceCompletedAgents(readList(row.getCompletedAgents(), new TypeReference<List<String>>() {}))
+                .replacePendingAgents(readList(row.getPendingAgents(), new TypeReference<List<String>>() {}))
+                .refreshAgentLists()
                 .build();
     }
 
@@ -106,6 +127,28 @@ public class InvestigationStore {
             return value == null ? List.of() : value;
         } catch (Exception ex) {
             return List.of();
+        }
+    }
+
+    private static InvestigationState parseState(String value) {
+        if (value == null || value.isBlank()) {
+            return InvestigationState.INITIALIZED;
+        }
+        try {
+            return InvestigationState.valueOf(value);
+        } catch (IllegalArgumentException ex) {
+            return InvestigationState.INITIALIZED;
+        }
+    }
+
+    private static Confidence parseConfidence(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Confidence.valueOf(value);
+        } catch (IllegalArgumentException ex) {
+            return null;
         }
     }
 

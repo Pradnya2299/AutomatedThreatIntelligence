@@ -1,11 +1,15 @@
 package com.threatadvisor.ai.agent.threat;
 
 import com.threatadvisor.ai.agent.common.AgentToolException;
+import com.threatadvisor.ai.agent.common.Confidence;
 import com.threatadvisor.ai.agent.common.EvidenceItem;
+import com.threatadvisor.ai.agent.common.EvidenceSource;
+import com.threatadvisor.ai.agent.common.InvestigationConfidence;
 import com.threatadvisor.ai.agent.common.SecurityAgent;
 import com.threatadvisor.ai.agent.common.SecurityInvestigationContext;
 import com.threatadvisor.ai.agent.dto.AffectedProduct;
 import com.threatadvisor.ai.agent.dto.ThreatIntelligenceResult;
+import com.threatadvisor.ai.agent.tool.CpeLookupTool;
 import com.threatadvisor.ai.agent.tool.CveLookupTool;
 import com.threatadvisor.ai.agent.tool.VulnerabilityContextTool;
 import com.threatadvisor.ai.domain.Vulnerability;
@@ -21,10 +25,13 @@ public class ThreatIntelligenceAgent implements SecurityAgent {
     public static final String NAME = "ThreatIntelligenceAgent";
 
     private final CveLookupTool cveLookupTool;
+    private final CpeLookupTool cpeLookupTool;
     private final VulnerabilityContextTool contextTool;
 
-    public ThreatIntelligenceAgent(CveLookupTool cveLookupTool, VulnerabilityContextTool contextTool) {
+    public ThreatIntelligenceAgent(
+            CveLookupTool cveLookupTool, CpeLookupTool cpeLookupTool, VulnerabilityContextTool contextTool) {
         this.cveLookupTool = cveLookupTool;
+        this.cpeLookupTool = cpeLookupTool;
         this.contextTool = contextTool;
     }
 
@@ -39,7 +46,7 @@ public class ThreatIntelligenceAgent implements SecurityAgent {
                 .orElseThrow(() -> new AgentToolException(
                         "CVE_NOT_FOUND",
                         "No vulnerability row for " + context.cveId()));
-        List<VulnerabilityCpe> cpes = cveLookupTool.findCpes(vulnerability.getId());
+        List<VulnerabilityCpe> cpes = cpeLookupTool.lookupCpes(vulnerability.getId());
         List<AffectedProduct> products = new ArrayList<>();
         if (vulnerability.getAffectedProducts() != null) {
             String[] vendors = vulnerability.getAffectedVendors() == null
@@ -65,9 +72,11 @@ public class ThreatIntelligenceAgent implements SecurityAgent {
         }
         String exploitability = exploitability(vulnerability);
         List<EvidenceItem> evidence = List.of(
-                new EvidenceItem("vulnerabilities", "cve_row", vulnerability.getCveId()),
-                new EvidenceItem("vulnerability_cpe", "cpe_count", String.valueOf(cpes.size())));
-        ThreatIntelligenceResult result = new ThreatIntelligenceResult(
+                EvidenceItem.fact(EvidenceSource.CVE_DATABASE, "cve_row", "Canonical CVE row", vulnerability.getCveId(),
+                        Confidence.HIGH),
+                EvidenceItem.fact(EvidenceSource.CPE_LOOKUP, "cpe_count", "CPE rows from vulnerability_cpe",
+                        String.valueOf(cpes.size()), cpes.isEmpty() ? Confidence.MEDIUM : Confidence.HIGH));
+        ThreatIntelligenceResult incomplete = new ThreatIntelligenceResult(
                 vulnerability.getCveId(),
                 vulnerability.getId(),
                 vulnerability.getSeverity(),
@@ -77,7 +86,20 @@ public class ThreatIntelligenceAgent implements SecurityAgent {
                 vulnerability.getActivelyExploited(),
                 List.copyOf(products),
                 contextTool.summarize(vulnerability),
-                evidence);
+                evidence,
+                null);
+        ThreatIntelligenceResult result = new ThreatIntelligenceResult(
+                incomplete.cveId(),
+                incomplete.vulnerabilityId(),
+                incomplete.severity(),
+                incomplete.cvssScore(),
+                incomplete.exploitability(),
+                incomplete.exploitAvailable(),
+                incomplete.activelyExploited(),
+                incomplete.affectedProducts(),
+                incomplete.summary(),
+                evidence,
+                InvestigationConfidence.threat(vulnerability, incomplete));
         return context.withVulnerability(vulnerability).withThreat(result);
     }
 

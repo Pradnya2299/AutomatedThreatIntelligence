@@ -46,6 +46,24 @@ public class SecurityInvestigation {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     private String recommendation;
+    @Column(name = "current_state", nullable = false, length = 32)
+    private String currentState;
+    @Column(name = "overall_confidence", length = 16)
+    private String overallConfidence;
+    @Column(name = "iteration_count", nullable = false)
+    private int iterationCount;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "decision_history", nullable = false, columnDefinition = "jsonb")
+    private String decisionHistory;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "execution_trace", nullable = false, columnDefinition = "jsonb")
+    private String executionTrace;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "completed_agents", nullable = false, columnDefinition = "jsonb")
+    private String completedAgents;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "pending_agents", nullable = false, columnDefinition = "jsonb")
+    private String pendingAgents;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
     @Column(name = "updated_at", nullable = false)
@@ -77,6 +95,20 @@ public class SecurityInvestigation {
     public void setEvidence(String evidence) { this.evidence = evidence; }
     public String getRecommendation() { return recommendation; }
     public void setRecommendation(String recommendation) { this.recommendation = recommendation; }
+    public String getCurrentState() { return currentState; }
+    public void setCurrentState(String currentState) { this.currentState = currentState; }
+    public String getOverallConfidence() { return overallConfidence; }
+    public void setOverallConfidence(String overallConfidence) { this.overallConfidence = overallConfidence; }
+    public int getIterationCount() { return iterationCount; }
+    public void setIterationCount(int iterationCount) { this.iterationCount = iterationCount; }
+    public String getDecisionHistory() { return decisionHistory; }
+    public void setDecisionHistory(String decisionHistory) { this.decisionHistory = decisionHistory; }
+    public String getExecutionTrace() { return executionTrace; }
+    public void setExecutionTrace(String executionTrace) { this.executionTrace = executionTrace; }
+    public String getCompletedAgents() { return completedAgents; }
+    public void setCompletedAgents(String completedAgents) { this.completedAgents = completedAgents; }
+    public String getPendingAgents() { return pendingAgents; }
+    public void setPendingAgents(String pendingAgents) { this.pendingAgents = pendingAgents; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
