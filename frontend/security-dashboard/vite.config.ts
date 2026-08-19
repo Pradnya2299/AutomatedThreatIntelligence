@@ -5,11 +5,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
-const apiUser = process.env.VITE_API_USER || 'analyst'
-const apiPassword = process.env.VITE_API_PASSWORD || 'analyst_change_me'
-const basic = Buffer.from(`${apiUser}:${apiPassword}`).toString('base64')
+const apiUser = process.env.VITE_API_USER || process.env.LOCAL_ANALYST_USERNAME || 'analyst'
+const apiPassword = process.env.VITE_API_PASSWORD || process.env.LOCAL_ANALYST_PASSWORD || 'analyst_change_me'
 
 export default defineConfig({
+  envDir: path.resolve(rootDir, '../..'),
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -22,11 +22,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
-            proxyReq.setHeader('Authorization', `Basic ${basic}`)
-          })
-        },
+        auth: `${apiUser}:${apiPassword}`,
       },
       '/actuator': {
         target: 'http://localhost:8080',
