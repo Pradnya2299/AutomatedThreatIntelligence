@@ -390,15 +390,17 @@ public class CodeRemediationService {
             }
         }
         String docker = git.getFile(workspace, "Dockerfile");
-        if (docker != null && DockerfilePatcher.currentFrom(docker) != null && looksContainerCve(investigation)) {
+        boolean hasDependencyFinding = !findings.isEmpty();
+        if (docker != null && DockerfilePatcher.currentFrom(docker) != null
+                && (looksContainerCve(investigation) || !hasDependencyFinding)) {
             findings.add(new CodeFinding(
                     "Dockerfile",
                     1,
                     "base-image",
                     DockerfilePatcher.currentFrom(docker),
                     "eclipse-temurin:17-jre",
-                    "Dockerfile FROM pin matches a container/base-image remediation class",
-                    Confidence.MEDIUM,
+                    "Dockerfile FROM pin is a container base-image remediation class",
+                    Confidence.HIGH,
                     "DETERMINISTIC Dockerfile FROM parse"));
         }
         String java = git.getFile(workspace, "src/main/java/com/northwind/InsecureHash.java");

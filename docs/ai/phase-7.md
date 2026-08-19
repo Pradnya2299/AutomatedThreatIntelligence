@@ -86,11 +86,28 @@ No shell-execution endpoints.
 After V9 (`./scripts/migrate.sh` or start api-service) and seed:
 
 1. Complete investigation `CVE-2021-44228`.
-2. Dashboard → Autonomous remediation → Start.
-3. Expect Maven `log4j-core` `2.14.1` → `2.17.1` in the real diff.
-4. Security verification is `PATCH_NOT_VERIFIED` when host tests are skipped (`AI_SKIP_HOST_BUILDS=true`).
-5. Approve does **not** push if GitHub is disabled.
-6. `local://empty-service` → `REVIEW_REQUIRED`, no PR.
+2. Dashboard → Autonomous remediation → pick an example:
+   - **Maven Log4j** — `pom.xml` `log4j-core` `2.14.1` → `2.17.1`
+   - **Docker base image** — `Dockerfile` `FROM openjdk:8u222-jdk` → `eclipse-temurin:17-jre`
+   - **Cannot safely fix** — empty repo → `REVIEW_REQUIRED`, no patch, no PR
+3. Security verification is `PATCH_NOT_VERIFIED` when host tests are skipped (`AI_SKIP_HOST_BUILDS=true`).
+4. Approve does **not** push if GitHub is disabled.
+
+### GitHub test repo contents (personal throwaway repos)
+
+**Example A — Maven**
+
+Root `pom.xml` with `log4j-core` `2.14.1` (see fixture `code-remediation-fixtures/payment-service`).
+
+**Example B — Docker**
+
+Root `Dockerfile`:
+
+```dockerfile
+FROM openjdk:8u222-jdk
+WORKDIR /app
+COPY . .
+```
 
 ## Environment
 

@@ -165,6 +165,22 @@ class CodeRemediationServiceTest {
     }
 
     @Test
+    void dockerFixtureProducesBaseImagePatch() {
+        UUID investigationId = UUID.randomUUID();
+        when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId)));
+        CodeRemediationResponse response = service.start(
+                investigationId,
+                new CodeRemediationRequest("analyst", "LOCAL_WORKSPACE", "northwind", "container-service",
+                        "local://container-service", "main"),
+                "analyst");
+        assertEquals("AWAITING_APPROVAL", response.currentState());
+        assertEquals("BASE_IMAGE_UPGRADE", response.strategy().strategyType().name());
+        assertNotNull(response.patch());
+        assertTrue(response.patch().unifiedDiff().contains("openjdk:8u222-jdk"));
+        assertTrue(response.patch().unifiedDiff().contains("eclipse-temurin:17-jre"));
+    }
+
+    @Test
     void emptyRepositoryIsReviewRequired() {
         UUID investigationId = UUID.randomUUID();
         when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId)));

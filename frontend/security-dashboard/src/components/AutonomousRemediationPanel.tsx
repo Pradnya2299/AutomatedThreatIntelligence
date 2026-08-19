@@ -17,6 +17,7 @@ import type { CodeRemediation } from '@/types/codeRemediation'
 export function AutonomousRemediationPanel({ investigation }: { investigation: Investigation }) {
   const queryClient = useQueryClient()
   const [showDiff, setShowDiff] = useState(true)
+  const [example, setExample] = useState<'mapped' | 'maven' | 'docker' | 'empty'>('mapped')
   const query = useQuery({
     queryKey: ['code-remediation', investigation.investigationId],
     queryFn: async () => {
@@ -33,7 +34,7 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
   })
 
   const start = useMutation({
-    mutationFn: () => startCodeRemediation(investigation.investigationId, { initiatedBy: 'analyst' }),
+    mutationFn: () => startCodeRemediation(investigation.investigationId, startBody(example)),
     onSuccess: (data) => {
       void queryClient.setQueryData(['code-remediation', investigation.investigationId], data)
     },
@@ -85,8 +86,21 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
       {!job && !query.isLoading ? (
         <div className="space-y-3">
           <p className="text-sm text-slate-300">
-            No code remediation job yet. This uses the mapped repository (or REVIEW_REQUIRED if none is mapped).
+            Pick a demo target. Maven Log4j and Docker are isolated fixture workspaces. Empty shows REVIEW_REQUIRED.
           </p>
+          <label className="block text-xs text-slate-500">
+            Example
+            <select
+              className="mt-1 block w-full rounded-md border border-border bg-[#08101c] px-2 py-1.5 text-sm text-white"
+              value={example}
+              onChange={(event) => setExample(event.target.value as typeof example)}
+            >
+              <option value="mapped">Mapped asset repo (seed / GitHub binding)</option>
+              <option value="maven">Example: Maven Log4j (pom.xml)</option>
+              <option value="docker">Example: Docker base image (Dockerfile)</option>
+              <option value="empty">Example: cannot safely fix</option>
+            </select>
+          </label>
           <Button type="button" onClick={() => start.mutate()} disabled={start.isPending}>
             {start.isPending ? 'Starting…' : 'Start code remediation'}
           </Button>
@@ -195,4 +209,35 @@ function JobView({
       ) : null}
     </div>
   )
+}
+
+function startBody(example: 'mapped' | 'maven' | 'docker' | 'empty'): Record<string, string> {
+  if (example === 'maven') {
+    return {
+      initiatedBy: 'analyst',
+      provider: 'LOCAL_WORKSPACE',
+      repository: 'payment-service',
+      repositoryUrl: 'local://payment-service',
+      defaultBranch: 'main',
+    }
+  }
+  if (example === 'docker') {
+    return {
+      initiatedBy: 'analyst',
+      provider: 'LOCAL_WORKSPACE',
+      repository: 'container-service',
+      repositoryUrl: 'local://container-service',
+      defaultBranch: 'main',
+    }
+  }
+  if (example === 'empty') {
+    return {
+      initiatedBy: 'analyst',
+      provider: 'LOCAL_WORKSPACE',
+      repository: 'empty-service',
+      repositoryUrl: 'local://empty-service',
+      defaultBranch: 'main',
+    }
+  }
+  return { initiatedBy: 'analyst' }
 }
