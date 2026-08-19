@@ -24,7 +24,11 @@ import com.threatadvisor.ai.coderemediation.domain.ValidationRunEntity;
 import com.threatadvisor.ai.coderemediation.dto.ApprovalDecisionRequest;
 import com.threatadvisor.ai.coderemediation.dto.CodeRemediationRequest;
 import com.threatadvisor.ai.coderemediation.dto.CodeRemediationResponse;
+import com.threatadvisor.ai.agent.dto.KnowledgeSearchResult;
+import com.threatadvisor.ai.agent.tool.PolicyRetrievalTool;
 import com.threatadvisor.ai.coderemediation.git.LocalWorkspaceGitProvider;
+import com.threatadvisor.ai.coderemediation.llm.CodeRemediationPromptFactory;
+import com.threatadvisor.ai.coderemediation.llm.DemoCodeRemediationLlm;
 import com.threatadvisor.ai.coderemediation.repo.ApprovalRequestRepository;
 import com.threatadvisor.ai.coderemediation.repo.CodePullRequestRepository;
 import com.threatadvisor.ai.coderemediation.repo.CodeRemediationAuditRepository;
@@ -89,13 +93,23 @@ class CodeRemediationServiceTest {
     void setup() {
         ObjectMapper mapper = new ObjectMapper();
         AiProperties properties = new AiProperties();
+        LocalWorkspaceGitProvider git = new LocalWorkspaceGitProvider();
         CodeRemediationAssembler assembler = new CodeRemediationAssembler(
                 mapper, jobs, targets, plans, executions, changes, validations, verifications, approvals, pullRequests, audit);
+        DemoCodeRemediationLlm llm = new DemoCodeRemediationLlm();
+        CodeRemediationPromptFactory prompts = new CodeRemediationPromptFactory();
+        PolicyRetrievalTool policies = query -> new KnowledgeSearchResult(List.of());
         service = new CodeRemediationService(
-                orchestrator, properties, new LocalWorkspaceGitProvider(),
+                orchestrator, properties, git,
                 new com.threatadvisor.ai.coderemediation.validation.DefaultValidationRunner(properties),
                 mapper, events, assembler, jobs, bindings, targets, plans, executions, changes,
-                validations, verifications, approvals, pullRequests);
+                validations, verifications, approvals, pullRequests,
+                new CodeAnalysisAgent(llm, prompts, policies),
+                new PatchPlanningAgent(llm, prompts, policies),
+                new PatchGenerationAgent(llm, prompts, policies),
+                new PatchApplicationService(git, properties),
+                new CodeContextSelector(),
+                llm);
         lastChanges.clear();
         lastValidations.clear();
         lastTarget = null;

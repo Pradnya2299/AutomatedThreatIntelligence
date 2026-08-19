@@ -14,8 +14,10 @@ import com.threatadvisor.ai.agent.dto.FinalRecommendation;
 import com.threatadvisor.ai.agent.dto.RemediationAgentResult;
 import com.threatadvisor.ai.agent.dto.RiskAnalystResult;
 import com.threatadvisor.ai.agent.dto.ThreatIntelligenceResult;
+import com.threatadvisor.ai.domain.Vulnerability;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +39,8 @@ public record InvestigationResponse(
         InvestigationState currentState,
         Confidence confidence,
         List<DecisionRecord> decisionHistory,
-        List<ExecutionTraceEntry> executionTrace
+        List<ExecutionTraceEntry> executionTrace,
+        VulnerabilityIntelligence vulnerabilityIntelligence
 ) {
     public static InvestigationResponse from(SecurityInvestigationContext context) {
         return new InvestigationResponse(
@@ -58,6 +61,23 @@ public record InvestigationResponse(
                 context.currentState(),
                 context.overallConfidence(),
                 context.decisionHistory(),
-                context.executionTrace());
+                context.executionTrace(),
+                fromVulnerability(context.vulnerability()));
+    }
+
+    private static VulnerabilityIntelligence fromVulnerability(Vulnerability vulnerability) {
+        if (vulnerability == null) {
+            return null;
+        }
+        return new VulnerabilityIntelligence(
+                vulnerability.getSource(),
+                vulnerability.getIntelligenceSource(),
+                vulnerability.getSourceIdentifier(),
+                vulnerability.getPublishedAt(),
+                vulnerability.getModifiedAt(),
+                vulnerability.getCvssVector(),
+                vulnerability.getCwe(),
+                vulnerability.getCwes() == null ? List.of() : Arrays.asList(vulnerability.getCwes()),
+                vulnerability.getDescription());
     }
 }

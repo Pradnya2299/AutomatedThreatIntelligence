@@ -136,6 +136,7 @@ npm run dev
 - [ER model](docs/database/er-model.md)
 - [Kafka architecture](docs/kafka/kafka-architecture.md)
 - [Event contracts](docs/kafka/event-contracts.md)
+- [Phase 7A/7B NVD + LLM code remediation](docs/ai/phase-7ab.md)
 - [Phase 7 autonomous code remediation](docs/ai/phase-7.md)
 - [Phase 6 SOC investigation dashboard](docs/frontend/phase-6.md)
 - [Phase 5B bounded agentic investigation](docs/ai/phase-5b.md)

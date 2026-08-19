@@ -58,7 +58,28 @@ public final class CvssExtractor {
 
     private static Metric fromNvdMetric(JsonNode node) {
         JsonNode data = node.has("cvssData") ? node.get("cvssData") : node;
-        return fromObject(data);
+        Metric metric = fromObject(data);
+        if (metric == null) {
+            return null;
+        }
+        ObjectNode extra = metric.extra();
+        copyText(data, extra, "attackVector", "attackComplexity", "privilegesRequired", "userInteraction",
+                "scope", "confidentialityImpact", "integrityImpact", "availabilityImpact");
+        copyText(node, extra, "exploitabilityScore", "impactScore");
+        return metric;
+    }
+
+    private static void copyText(JsonNode source, ObjectNode target, String... fields) {
+        for (String field : fields) {
+            JsonNode value = source.get(field);
+            if (value != null && !value.isNull() && !value.isMissingNode()) {
+                if (value.isNumber()) {
+                    target.put(field, value.decimalValue());
+                } else {
+                    target.put(field, value.asText());
+                }
+            }
+        }
     }
 
     private static Metric fromObject(JsonNode node) {
@@ -76,7 +97,7 @@ public final class CvssExtractor {
         if (score == null && vector == null && severity == null) {
             return null;
         }
-        return new Metric(score, vector, severity == null ? "UNKNOWN" : severity);
+        return new Metric(score, vector, severity == null ? "UNKNOWN" : severity, JsonNodeFactory.instance.objectNode());
     }
 
     private static String severityFromScore(BigDecimal score) {
@@ -130,9 +151,9 @@ public final class CvssExtractor {
         return b;
     }
 
-    private record Metric(BigDecimal score, String vector, String severity) {
+    private record Metric(BigDecimal score, String vector, String severity, ObjectNode extra) {
         ObjectNode toJson() {
-            ObjectNode node = JsonNodeFactory.instance.objectNode();
+            ObjectNode node = extra == null ? JsonNodeFactory.instance.objectNode() : extra.deepCopy();
             if (score != null) {
                 node.put("score", score);
             }

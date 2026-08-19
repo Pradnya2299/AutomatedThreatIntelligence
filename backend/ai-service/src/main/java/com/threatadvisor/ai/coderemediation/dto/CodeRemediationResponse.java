@@ -29,7 +29,13 @@ public record CodeRemediationResponse(
         VerificationView securityVerification,
         ApprovalView approval,
         PullRequestView pullRequest,
-        boolean githubEnabled
+        boolean githubEnabled,
+        String intelligenceMode,
+        String intelligenceSource,
+        String modelName,
+        String promptVersion,
+        Object codeAnalysis,
+        Object llmPatchPlan
 ) {
     public record PatchPlanView(
             UUID id,

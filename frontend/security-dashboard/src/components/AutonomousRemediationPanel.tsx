@@ -113,7 +113,14 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
           ) : null}
         </div>
       ) : null}
-      {job ? <JobView job={job} showDiff={showDiff} onToggleDiff={() => setShowDiff((v) => !v)} /> : null}
+      {job ? (
+        <JobView
+          job={job}
+          investigation={investigation}
+          showDiff={showDiff}
+          onToggleDiff={() => setShowDiff((v) => !v)}
+        />
+      ) : null}
       {job?.currentState === 'AWAITING_APPROVAL' ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <Button type="button" onClick={() => approve.mutate()} disabled={approve.isPending}>
@@ -133,76 +140,119 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
 
 function JobView({
   job,
+  investigation,
   showDiff,
   onToggleDiff,
 }: {
   job: CodeRemediation
+  investigation: Investigation
   showDiff: boolean
   onToggleDiff: () => void
 }) {
   const repo = job.repository
+  const intel = investigation.vulnerabilityIntelligence
+  const analysis = job.codeAnalysis
+  const plan = job.llmPatchPlan
+  const modeLabel =
+    job.intelligenceMode === 'LLM_POWERED'
+      ? 'LLM POWERED'
+      : job.intelligenceMode === 'DETERMINISTIC_FALLBACK'
+        ? 'DETERMINISTIC FALLBACK'
+        : 'DEMO MODE'
+  const product = investigation.threatIntelligence?.affectedProducts?.[0]
   return (
-    <div className="space-y-3 text-sm">
+    <div className="space-y-4 text-sm">
       <div className="flex flex-wrap gap-2">
         <Badge value={job.currentState} />
         <Badge value={job.status} />
+        <Badge value={modeLabel} />
         {job.securityVerification?.result ? <Badge value={job.securityVerification.result} /> : null}
         <Badge value={job.githubEnabled ? 'GITHUB_ENABLED' : 'GITHUB_DISABLED'} />
       </div>
-      <p className="font-mono text-white">{job.cveId}</p>
+
+      <section className="space-y-1 rounded-md border border-border p-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500">Vulnerability intelligence</p>
+        <p className="text-slate-300">Source: {intel?.intelligenceSource || intel?.source || job.intelligenceSource || 'SEED'}</p>
+        <p className="font-mono text-white">{job.cveId}</p>
+        <p className="text-slate-300">CVSS: {investigation.threatIntelligence?.cvssScore ?? 'Not available'}</p>
+        <p className="text-slate-300">Severity: {investigation.threatIntelligence?.severity ?? 'Not available'}</p>
+        <p className="text-slate-300">Affected component: {analysis?.affectedComponent || product?.product || 'Not available'}</p>
+        <p className="text-slate-300">
+          Vulnerable version: {product?.versionStartIncluding || 'From CPE / asset match'}
+        </p>
+        <p className="text-slate-300">
+          Fixed version: {investigation.remediation?.targetVersion || product?.versionEndExcluding || 'Not available'}
+        </p>
+      </section>
+
+      <section className="space-y-1 rounded-md border border-border p-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500">AI code analysis</p>
+        <p className="text-slate-300">Mode: {modeLabel}</p>
+        <p className="text-slate-300">Model: {job.modelName || 'Not available'}</p>
+        <p className="text-slate-300">Prompt: {job.promptVersion || 'Not available'}</p>
+        <p className="text-slate-300">Confidence: {analysis?.confidence || job.confidence || 'Not available'}</p>
+        <p className="text-slate-300">Vulnerability type: {analysis?.vulnerabilityType || 'Not available'}</p>
+        <p className="text-slate-300">Root cause: {analysis?.rootCause || job.strategy?.rationale || 'Not available'}</p>
+        <p className="text-slate-300">
+          Relevant files:{' '}
+          {analysis?.relevantFiles?.map((file) => file.path).join(', ') ||
+            job.strategy?.affectedFiles?.join(', ') ||
+            'Not available'}
+        </p>
+      </section>
+
+      <section className="space-y-1 rounded-md border border-border p-3">
+        <p className="text-xs uppercase tracking-wide text-slate-500">AI patch plan</p>
+        <p className="text-slate-300">{plan?.summary || job.plan?.rationale || 'Not available'}</p>
+        <p className="text-slate-300">{plan?.expectedDiffSummary || job.strategy?.expectedChanges?.join('; ')}</p>
+      </section>
+
       <dl className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <div>
           <dt className="text-slate-500">Repository</dt>
           <dd className="text-white">{repo?.repository ?? 'Not available'}</dd>
         </div>
         <div>
-          <dt className="text-slate-500">Base</dt>
-          <dd className="text-white">{repo?.defaultBranch ?? 'Not available'}</dd>
-        </div>
-        <div>
           <dt className="text-slate-500">AI branch</dt>
           <dd className="text-white">{repo?.aiBranch ?? 'Not available'}</dd>
         </div>
-        <div>
-          <dt className="text-slate-500">Strategy</dt>
-          <dd className="text-white">{job.strategy?.strategyType ?? job.plan?.strategyType ?? 'Not available'}</dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">Files changed</dt>
-          <dd className="text-white">{job.patch?.filesChanged ?? 'Not available'}</dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">AI confidence</dt>
-          <dd className="text-white">{job.confidence ?? job.strategy?.confidence ?? 'Not available'}</dd>
-        </div>
       </dl>
       {job.reviewReason ? <p className="text-amber-200">{job.reviewReason}</p> : null}
-      {job.strategy?.rationale ? <p className="text-slate-300">{job.strategy.rationale}</p> : null}
-      {job.securityVerification ? (
-        <p className="text-slate-300">
-          Security verification: {job.securityVerification.result}. {job.securityVerification.details}
-        </p>
-      ) : null}
+
+      <section className="space-y-1">
+        <p className="text-xs uppercase tracking-wide text-slate-500">Generated patch</p>
+        <Button type="button" onClick={onToggleDiff}>
+          {showDiff ? 'Hide diff' : 'View diff'}
+        </Button>
+        {showDiff ? (
+          <pre className="max-h-96 overflow-auto rounded-md border border-border bg-black/40 p-3 font-mono text-xs text-slate-200">
+            {job.patch?.unifiedDiff || 'Not available'}
+          </pre>
+        ) : null}
+      </section>
+
       {job.validations?.length ? (
-        <div>
-          <p className="text-slate-500">Validation</p>
+        <section>
+          <p className="text-xs uppercase tracking-wide text-slate-500">Validation (deterministic)</p>
           <ul className="mt-1 space-y-1 font-mono text-xs text-slate-300">
             {job.validations.map((run) => (
               <li key={run.command}>
-                {run.status} {run.command} {run.exitCode === null ? '' : `(exit ${run.exitCode})`}
+                {run.command}: {run.status}
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
-      <Button type="button" onClick={onToggleDiff}>
-        {showDiff ? 'Hide diff' : 'View diff'}
-      </Button>
-      {showDiff ? (
-        <pre className="max-h-96 overflow-auto rounded-md border border-border bg-black/40 p-3 font-mono text-xs text-slate-200">
-          {job.patch?.unifiedDiff || 'Not available'}
-        </pre>
+
+      {job.securityVerification ? (
+        <section>
+          <p className="text-xs uppercase tracking-wide text-slate-500">Security verification (deterministic)</p>
+          <p className="text-slate-300">
+            {job.securityVerification.result}. {job.securityVerification.details}
+          </p>
+        </section>
       ) : null}
+
       {job.pullRequest ? (
         <p className="text-slate-300">
           PR: {job.pullRequest.pullRequestUrl ?? 'Not created'}{' '}

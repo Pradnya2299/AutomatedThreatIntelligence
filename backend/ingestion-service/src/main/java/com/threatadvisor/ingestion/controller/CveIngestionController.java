@@ -1,8 +1,10 @@
 package com.threatadvisor.ingestion.controller;
 
 import com.threatadvisor.ingestion.dto.IngestionResponse;
+import com.threatadvisor.ingestion.dto.NvdLookupResponse;
 import com.threatadvisor.ingestion.exception.IngestionException;
 import com.threatadvisor.ingestion.service.CveIngestionService;
+import com.threatadvisor.ingestion.service.NvdIngestionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,9 +29,11 @@ public class CveIngestionController {
     private static final Pattern FIXTURE_NAME = Pattern.compile("^[a-zA-Z0-9._-]+$");
 
     private final CveIngestionService ingestionService;
+    private final NvdIngestionService nvdIngestionService;
 
-    public CveIngestionController(CveIngestionService ingestionService) {
+    public CveIngestionController(CveIngestionService ingestionService, NvdIngestionService nvdIngestionService) {
         this.ingestionService = ingestionService;
+        this.nvdIngestionService = nvdIngestionService;
     }
 
     @PostMapping(value = "/cve", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -62,5 +66,11 @@ public class CveIngestionController {
         IngestionResponse response = ingestionService.ingest(body, "fixture", correlationId);
         HttpStatus status = "ACCEPTED".equals(response.status()) ? HttpStatus.ACCEPTED : HttpStatus.OK;
         return ResponseEntity.status(status).body(response);
+    }
+
+    @PostMapping("/nvd/cves/{cveId}")
+    public ResponseEntity<NvdLookupResponse> lookupFromNvd(@PathVariable String cveId) {
+        NvdLookupResponse response = nvdIngestionService.lookupCve(cveId);
+        return ResponseEntity.ok(response);
     }
 }

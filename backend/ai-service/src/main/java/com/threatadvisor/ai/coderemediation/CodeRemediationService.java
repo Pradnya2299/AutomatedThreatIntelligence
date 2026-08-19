@@ -27,6 +27,12 @@ import com.threatadvisor.ai.coderemediation.git.PullRequestRef;
 import com.threatadvisor.ai.coderemediation.git.PullRequestRequest;
 import com.threatadvisor.ai.coderemediation.model.CodeFinding;
 import com.threatadvisor.ai.coderemediation.model.RemediationStrategy;
+import com.threatadvisor.ai.coderemediation.llm.CodeAnalysisResponse;
+import com.threatadvisor.ai.coderemediation.llm.CodeRemediationLlm;
+import com.threatadvisor.ai.coderemediation.llm.CodeRemediationPromptFactory;
+import com.threatadvisor.ai.coderemediation.llm.GeneratedPatch;
+import com.threatadvisor.ai.coderemediation.llm.LlmPatchPlan;
+import com.threatadvisor.ai.coderemediation.llm.LlmUnavailableException;
 import com.threatadvisor.ai.coderemediation.patch.DockerfilePatcher;
 import com.threatadvisor.ai.coderemediation.patch.MavenDependencyPatcher;
 import com.threatadvisor.ai.coderemediation.patch.NpmPackagePatcher;
@@ -93,6 +99,12 @@ public class CodeRemediationService {
     private final SecurityVerificationRepository verifications;
     private final ApprovalRequestRepository approvals;
     private final CodePullRequestRepository pullRequests;
+    private final CodeAnalysisAgent codeAnalysisAgent;
+    private final PatchPlanningAgent patchPlanningAgent;
+    private final PatchGenerationAgent patchGenerationAgent;
+    private final PatchApplicationService patchApplicationService;
+    private final CodeContextSelector codeContextSelector;
+    private final CodeRemediationLlm codeRemediationLlm;
 
     public CodeRemediationService(
             SecurityOrchestrator investigations,
@@ -111,7 +123,13 @@ public class CodeRemediationService {
             ValidationRunRepository validations,
             SecurityVerificationRepository verifications,
             ApprovalRequestRepository approvals,
-            CodePullRequestRepository pullRequests) {
+            CodePullRequestRepository pullRequests,
+            CodeAnalysisAgent codeAnalysisAgent,
+            PatchPlanningAgent patchPlanningAgent,
+            PatchGenerationAgent patchGenerationAgent,
+            PatchApplicationService patchApplicationService,
+            CodeContextSelector codeContextSelector,
+            CodeRemediationLlm codeRemediationLlm) {
         this.investigations = investigations;
         this.properties = properties;
         this.gitProvider = gitProvider;
@@ -129,6 +147,12 @@ public class CodeRemediationService {
         this.verifications = verifications;
         this.approvals = approvals;
         this.pullRequests = pullRequests;
+        this.codeAnalysisAgent = codeAnalysisAgent;
+        this.patchPlanningAgent = patchPlanningAgent;
+        this.patchGenerationAgent = patchGenerationAgent;
+        this.patchApplicationService = patchApplicationService;
+        this.codeContextSelector = codeContextSelector;
+        this.codeRemediationLlm = codeRemediationLlm;
     }
 
     @Transactional
@@ -158,6 +182,16 @@ public class CodeRemediationService {
         job.setInitiatedBy(initiatedBy == null ? (request == null ? null : request.initiatedBy()) : initiatedBy);
         job.setCorrelationId(investigation.correlationId());
         job.setAttemptCount(0);
+        job.setIntelligenceMode(codeRemediationLlm.mode());
+        job.setModelName(codeRemediationLlm.modelName());
+        job.setPromptVersion(CodeRemediationPromptFactory.PROMPT_VERSION);
+        if (investigation.vulnerability() != null && investigation.vulnerability().getIntelligenceSource() != null) {
+            job.setIntelligenceSource(investigation.vulnerability().getIntelligenceSource());
+        } else if (investigation.vulnerability() != null && investigation.vulnerability().getSource() != null) {
+            job.setIntelligenceSource("nvd".equalsIgnoreCase(investigation.vulnerability().getSource()) ? "NVD" : "SEED");
+        } else {
+            job.setIntelligenceSource("SEED");
+        }
         job.setCreatedAt(now);
         job.setUpdatedAt(now);
         jobs.save(job);
@@ -248,9 +282,40 @@ public class CodeRemediationService {
         assembler.audit(job.getId(), "RepositoryDiscoveryAgent", "REPOSITORY_FOUND", "RepositoryCloneTool", assembler.json(binding.getRepositoryUrl()));
 
         transition(job, CodeRemediationState.ANALYZING_CODE);
+        List<CodeContextSelector.WorkspaceFile> contextFiles = codeContextSelector.select(
+                workspace, gitProvider, primaryProduct(investigation));
         List<CodeFinding> findings = analyze(workspace, investigation, gitProvider);
+        RemediationStrategy strategy;
+        LlmPatchPlan llmPlan = null;
+        boolean usedLlm = true;
+        try {
+            CodeAnalysisResponse analysis = codeAnalysisAgent.analyze(investigation, contextFiles);
+            job.setCodeAnalysisJson(assembler.json(analysis));
+            assembler.audit(job.getId(), CodeAnalysisAgent.NAME, "ANALYZED", "CodeRemediationLlm", analysis.getRemediationStrategy());
+            if ("LOW".equals(analysis.getConfidence())
+                    || "REVIEW_REQUIRED".equals(analysis.getRemediationStrategy())
+                    || "INSUFFICIENT_EVIDENCE".equals(analysis.getRemediationStrategy())) {
+                review(job, analysis.getRootCause() == null ? "LLM returned insufficient evidence" : analysis.getRootCause());
+                return;
+            }
+            if (analysis.getRelevantFiles().isEmpty()) {
+                review(job, "LLM did not identify any workspace files that exist (hallucinated paths were dropped).");
+                return;
+            }
+            llmPlan = patchPlanningAgent.plan(investigation, contextFiles, analysis);
+            job.setLlmPatchPlanJson(assembler.json(llmPlan));
+            if ("LOW".equals(llmPlan.getConfidence())) {
+                review(job, "Patch plan confidence is LOW");
+                return;
+            }
+            strategy = strategyFromLlm(analysis, llmPlan, investigation);
+        } catch (LlmUnavailableException ex) {
+            usedLlm = false;
+            job.setIntelligenceMode("DETERMINISTIC_FALLBACK");
+            assembler.audit(job.getId(), CodeAnalysisAgent.NAME, "LLM_UNAVAILABLE", null, assembler.json(ex.getMessage()));
+            strategy = classify(findings, investigation);
+        }
         assembler.audit(job.getId(), "CodeAnalysisAgent", "ANALYZED", "RepositorySearchTool", assembler.json(findings.size()));
-        RemediationStrategy strategy = classify(findings, investigation);
         if (strategy.strategyType() == RemediationStrategyType.MANUAL_REVIEW || strategy.confidence() == Confidence.LOW) {
             review(job, strategy.rationale());
             return;
@@ -258,18 +323,29 @@ public class CodeRemediationService {
         transition(job, CodeRemediationState.PLAN_CREATED);
         PatchPlanEntity plan = savePlan(job, strategy);
         publish(TOPIC_PLANNED, job, "{}");
-        assembler.audit(job.getId(), "PatchPlanningAgent", "PLAN_CREATED", null, assembler.json(strategy.strategyType()));
+        assembler.audit(job.getId(), PatchPlanningAgent.NAME, "PLAN_CREATED", null, assembler.json(strategy.strategyType()));
 
         int maxAttempts = Math.max(1, properties.getCodeRemediation().getMaxPatchAttempts());
         PatchExecutionEntity execution = null;
         List<ValidationOutcome> lastValidations = List.of();
+        String previousFailure = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             job.setAttemptCount(attempt);
-            execution = generatePatch(job, plan, workspace, findings, strategy, attempt);
+            Path attemptWorkspace = materializeWorkspace(binding);
+            gitProvider.createBranch(attemptWorkspace, binding.getDefaultBranch(), branch);
+            List<CodeContextSelector.WorkspaceFile> attemptFiles = codeContextSelector.select(
+                    attemptWorkspace, gitProvider, primaryProduct(investigation));
+            if (usedLlm && llmPlan != null) {
+                execution = generateLlmPatch(job, plan, attemptWorkspace, attemptFiles, investigation, llmPlan, previousFailure, attempt);
+            } else {
+                execution = generatePatch(job, plan, attemptWorkspace, findings, strategy, attempt);
+            }
             if ("REJECTED".equals(execution.getSafetyStatus())) {
                 review(job, "Patch rejected by safety guardrails: " + execution.getSafetyViolations());
                 return;
             }
+            workspace = attemptWorkspace;
+            target.setWorkspacePath(workspace.toString());
             transition(job, CodeRemediationState.PATCH_GENERATED);
             publish(TOPIC_PATCH_GENERATED, job, "{}");
             transition(job, CodeRemediationState.VALIDATING);
@@ -277,6 +353,11 @@ public class CodeRemediationService {
             boolean failed = lastValidations.stream().anyMatch(v -> "FAILED".equals(v.status()));
             if (failed) {
                 transition(job, CodeRemediationState.PATCH_FAILED);
+                previousFailure = lastValidations.stream()
+                        .filter(v -> "FAILED".equals(v.status()))
+                        .map(v -> v.command() + " " + v.stderrSummary())
+                        .findFirst()
+                        .orElse("validation FAILED");
                 assembler.audit(job.getId(), "PatchRepairAgent", "RETRY", "TestTool", assembler.json(attempt));
                 if (attempt == maxAttempts) {
                     review(job, "Validation failed after " + maxAttempts + " patch attempts");
@@ -457,6 +538,75 @@ public class CodeRemediationService {
                 List.of("Isolated ai-security branch", "Human approval before any PR"),
                 List.of("Build/test may fail", "Transitive dependencies may remain"),
                 "Revert the isolated branch; default branch is untouched");
+    }
+
+    private RemediationStrategy strategyFromLlm(
+            CodeAnalysisResponse analysis, LlmPatchPlan plan, SecurityInvestigationContext investigation) {
+        RemediationStrategyType type = switch (analysis.getRemediationStrategy()) {
+            case "DEPENDENCY_UPGRADE" -> RemediationStrategyType.DEPENDENCY_UPGRADE;
+            case "BASE_IMAGE_UPGRADE" -> RemediationStrategyType.BASE_IMAGE_UPGRADE;
+            case "SOURCE_CODE_CHANGE" -> RemediationStrategyType.SOURCE_CODE_CHANGE;
+            case "CONFIGURATION_CHANGE" -> RemediationStrategyType.APPLICATION_CONFIGURATION_CHANGE;
+            default -> RemediationStrategyType.MANUAL_REVIEW;
+        };
+        List<String> files = analysis.getRelevantFiles().stream().map(CodeAnalysisResponse.RelevantFile::getPath).toList();
+        List<String> expected = analysis.getRecommendedChanges().stream()
+                .map(c -> c.getFile() + ": " + c.getChange())
+                .toList();
+        return new RemediationStrategy(
+                type,
+                plan.getSummary() + " Risk score remains " + investigation.risk().riskScore() + " from the risk engine.",
+                files,
+                expected,
+                Confidence.valueOf(analysis.getConfidence()),
+                List.of("Isolated ai-security branch", "Human approval before any PR"),
+                analysis.getRisks(),
+                plan.getRollbackPlan());
+    }
+
+    private PatchExecutionEntity generateLlmPatch(
+            CodeRemediationJobEntity job,
+            PatchPlanEntity plan,
+            Path workspace,
+            List<CodeContextSelector.WorkspaceFile> files,
+            SecurityInvestigationContext investigation,
+            LlmPatchPlan llmPlan,
+            String previousFailure,
+            int attempt) {
+        GeneratedPatch generated = patchGenerationAgent.generate(investigation, files, llmPlan, previousFailure);
+        job.setGeneratedPatchJson(assembler.json(generated));
+        java.util.Set<String> allowed = new java.util.LinkedHashSet<>();
+        files.forEach(file -> allowed.add(file.path()));
+        if (plan.getAffectedFiles() != null) {
+            allowed.addAll(assembler.readList(plan.getAffectedFiles()));
+        }
+        PatchApplicationService.AppliedPatch applied = patchApplicationService.apply(workspace, generated, allowed);
+        PatchExecutionEntity execution = new PatchExecutionEntity();
+        execution.setId(UUID.randomUUID());
+        execution.setJobId(job.getId());
+        execution.setPatchPlanId(plan.getId());
+        execution.setAttemptNumber(attempt);
+        execution.setUnifiedDiff(applied.unifiedDiff());
+        execution.setFilesChanged(applied.fileChanges().size());
+        execution.setLinesAdded(applied.added());
+        execution.setLinesDeleted(applied.deleted());
+        execution.setSafetyViolations(assembler.json(applied.violations()));
+        execution.setSafetyStatus(applied.safe() ? "PASSED" : "REJECTED");
+        execution.setStatus(applied.safe() ? "GENERATED" : "REJECTED");
+        execution.setCreatedAt(Instant.now());
+        executions.save(execution);
+        for (PatchSafetyGuard.FileChange change : applied.fileChanges()) {
+            PatchChangeEntity row = new PatchChangeEntity();
+            row.setId(UUID.randomUUID());
+            row.setPatchExecutionId(execution.getId());
+            row.setFilePath(change.path());
+            row.setChangeType("MODIFY");
+            row.setBeforeExcerpt(excerpt(change.before()));
+            row.setAfterExcerpt(excerpt(change.after()));
+            changes.save(row);
+        }
+        assembler.audit(job.getId(), PatchGenerationAgent.NAME, "PATCH", "PatchApplyTool", assembler.json(execution.getFilesChanged()));
+        return execution;
     }
 
     private PatchExecutionEntity generatePatch(

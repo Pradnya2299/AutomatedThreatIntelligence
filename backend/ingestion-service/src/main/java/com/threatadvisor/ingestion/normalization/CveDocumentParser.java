@@ -51,6 +51,22 @@ public final class CveDocumentParser {
         if (payload.has("cve") && payload.get("cve").has("descriptions")) {
             metadata.set("nvdDescriptions", payload.get("cve").get("descriptions"));
         }
+        if (payload.hasNonNull("sourceIdentifier")) {
+            metadata.put("sourceIdentifier", payload.get("sourceIdentifier").asText());
+        } else if (payload.path("cve").hasNonNull("sourceIdentifier")) {
+            metadata.put("sourceIdentifier", payload.path("cve").get("sourceIdentifier").asText());
+        }
+        List<String> affectedVersions = cpes.stream()
+                .map(CpeExtractor.ExtractedCpe::versionStartIncluding)
+                .filter(v -> v != null && !v.isBlank())
+                .distinct()
+                .toList();
+        List<String> fixedVersions = cpes.stream()
+                .map(CpeExtractor.ExtractedCpe::versionEndExcluding)
+                .filter(v -> v != null && !v.isBlank())
+                .distinct()
+                .toList();
+        metadata.put("parser", "CveDocumentParser");
         return new NormalizedVulnerability(
                 cveId,
                 description,
@@ -71,7 +87,10 @@ public final class CveDocumentParser {
                 metadata,
                 cpes,
                 stringList(payload, "references", "referenceUrls"),
-                payload
+                payload,
+                firstText(payload, "sourceIdentifier"),
+                affectedVersions,
+                fixedVersions
         );
     }
 

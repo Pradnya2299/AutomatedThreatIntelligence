@@ -17,6 +17,8 @@ public class AiProperties {
     private int chunkOverlapChars = 200;
     private String correlationBaseUrl = "http://localhost:8082";
     private String riskBaseUrl = "http://localhost:8083";
+    private String ingestionBaseUrl = "http://localhost:8081";
+    private boolean nvdLookupEnabled = true;
     /**
      * Maximum orchestrator loop iterations (Phase 5B). Reaching the cap yields
      * {@code REVIEW_REQUIRED} rather than an infinite agent loop.
@@ -119,6 +121,22 @@ public class AiProperties {
 
     public void setRiskBaseUrl(String riskBaseUrl) {
         this.riskBaseUrl = riskBaseUrl;
+    }
+
+    public String getIngestionBaseUrl() {
+        return ingestionBaseUrl;
+    }
+
+    public void setIngestionBaseUrl(String ingestionBaseUrl) {
+        this.ingestionBaseUrl = ingestionBaseUrl;
+    }
+
+    public boolean isNvdLookupEnabled() {
+        return nvdLookupEnabled;
+    }
+
+    public void setNvdLookupEnabled(boolean nvdLookupEnabled) {
+        this.nvdLookupEnabled = nvdLookupEnabled;
     }
 
     public int getMaxAgentIterations() {

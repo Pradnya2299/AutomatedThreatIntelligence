@@ -53,4 +53,14 @@ class CveNormalizationUnitTest {
         var payload = mapper.readTree("{\"cveId\":\"CVE-2024-90099\"}");
         assertThrows(IngestionException.class, () -> CveDocumentParser.parse(payload, "manual"));
     }
+
+    @Test
+    void parsesNvdEnvelope() throws Exception {
+        var envelope = mapper.readTree(getClass().getResourceAsStream("/nvd/cve-2021-44228.json"));
+        var documents = com.threatadvisor.ingestion.nvd.NvdDocumentAdapter.extractCveDocuments(envelope);
+        var normalized = CveDocumentParser.parse(documents.getFirst(), "nvd");
+        assertEquals("CVE-2021-44228", normalized.cveId());
+        assertEquals("nvd", normalized.source());
+        assertTrue(normalized.cvssMetrics().path("v3.1").has("attackVector"));
+    }
 }

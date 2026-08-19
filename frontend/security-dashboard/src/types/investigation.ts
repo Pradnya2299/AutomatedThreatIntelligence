@@ -186,6 +186,18 @@ export type Recommendation = {
   summary: string | null
 }
 
+export type VulnerabilityIntelligence = {
+  source: string | null
+  intelligenceSource: string | null
+  sourceIdentifier: string | null
+  publishedAt: string | null
+  lastModifiedAt: string | null
+  cvssVector: string | null
+  cwe: string | null
+  cwes: string[] | null
+  description: string | null
+}
+
 export type Investigation = {
   investigationId: string
   cveId: string
@@ -205,6 +217,7 @@ export type Investigation = {
   confidence: Confidence | null
   decisionHistory: DecisionRecord[] | null
   executionTrace: ExecutionTraceEntry[] | null
+  vulnerabilityIntelligence?: VulnerabilityIntelligence | null
 }
 
 export const PIPELINE_AGENTS = [

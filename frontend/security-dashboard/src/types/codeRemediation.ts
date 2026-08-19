@@ -94,6 +94,29 @@ export type CodeRemediation = {
     skippedReason: string | null
   } | null
   githubEnabled: boolean
+  intelligenceMode: string | null
+  intelligenceSource: string | null
+  modelName: string | null
+  promptVersion: string | null
+  codeAnalysis: {
+    vulnerabilityType?: string
+    affectedComponent?: string
+    rootCause?: string
+    confidence?: string
+    relevantFiles?: { path: string; reason?: string }[]
+    remediationStrategy?: string
+    recommendedChanges?: { file: string; change?: string; reason?: string }[]
+    validationPlan?: string[]
+    risks?: string[]
+  } | null
+  llmPatchPlan: {
+    summary?: string
+    expectedDiffSummary?: string
+    validationCommands?: string[]
+    rollbackPlan?: string
+    confidence?: string
+    changes?: { file: string; operation?: string; reason?: string }[]
+  } | null
 }
 
 export function isCodeRemediationTerminal(state: string | null | undefined): boolean {

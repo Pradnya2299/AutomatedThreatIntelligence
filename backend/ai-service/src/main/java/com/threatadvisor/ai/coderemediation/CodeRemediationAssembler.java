@@ -174,7 +174,13 @@ public class CodeRemediationAssembler {
                 verificationView,
                 approvalView,
                 prView,
-                githubEnabled);
+                githubEnabled,
+                job.getIntelligenceMode(),
+                job.getIntelligenceSource(),
+                job.getModelName(),
+                job.getPromptVersion(),
+                readJson(job.getCodeAnalysisJson()),
+                readJson(job.getLlmPatchPlanJson()));
     }
 
     public void audit(UUID jobId, String agent, String action, String tool, String detailJson) {
@@ -221,6 +227,17 @@ public class CodeRemediationAssembler {
             });
         } catch (Exception ex) {
             return List.of();
+        }
+    }
+
+    private Object readJson(String json) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(json);
+        } catch (Exception ex) {
+            return null;
         }
     }
 }

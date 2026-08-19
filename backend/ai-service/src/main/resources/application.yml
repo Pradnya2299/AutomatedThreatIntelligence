@@ -62,6 +62,8 @@ ai:
   chunk-overlap-chars: 200
   correlation-base-url: ${CORRELATION_SERVICE_URL:http://localhost:8082}
   risk-base-url: ${RISK_SERVICE_URL:http://localhost:8083}
+  ingestion-base-url: ${INGESTION_SERVICE_URL:http://localhost:8081}
+  nvd-lookup-enabled: ${NVD_LOOKUP_ENABLED:true}
   max-agent-iterations: ${AI_MAX_AGENT_ITERATIONS:10}
   git:
     enabled: ${GITHUB_ENABLED:false}

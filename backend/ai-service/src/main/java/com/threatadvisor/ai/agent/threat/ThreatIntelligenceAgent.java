@@ -75,7 +75,13 @@ public class ThreatIntelligenceAgent implements SecurityAgent {
                 EvidenceItem.fact(EvidenceSource.CVE_DATABASE, "cve_row", "Canonical CVE row", vulnerability.getCveId(),
                         Confidence.HIGH),
                 EvidenceItem.fact(EvidenceSource.CPE_LOOKUP, "cpe_count", "CPE rows from vulnerability_cpe",
-                        String.valueOf(cpes.size()), cpes.isEmpty() ? Confidence.MEDIUM : Confidence.HIGH));
+                        String.valueOf(cpes.size()), cpes.isEmpty() ? Confidence.MEDIUM : Confidence.HIGH),
+                EvidenceItem.fact(EvidenceSource.CVE_DATABASE, "intelligence_source",
+                        "Vulnerability intelligence source",
+                        vulnerability.getIntelligenceSource() == null
+                                ? (vulnerability.getSource() == null ? "SEED" : vulnerability.getSource())
+                                : vulnerability.getIntelligenceSource(),
+                        Confidence.HIGH));
         ThreatIntelligenceResult incomplete = new ThreatIntelligenceResult(
                 vulnerability.getCveId(),
                 vulnerability.getId(),
