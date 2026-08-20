@@ -6,7 +6,7 @@ import { ErrorState } from '@/components/LoadingState'
 import { createInvestigation } from '@/services/api/investigations'
 import { ApiError } from '@/services/api/client'
 import { rememberInvestigation } from '@/utils/recentInvestigations'
-import { DEMO_CVES } from '@/data/demoCves'
+import { DEMO_CVES } from '@/constants/demoCves'
 
 export function NewInvestigationPage() {
   const navigate = useNavigate()
