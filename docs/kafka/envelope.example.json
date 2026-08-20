@@ -1,0 +1,9 @@
+{
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "eventType": "cve.raw",
+  "eventVersion": 1,
+  "timestamp": "2026-08-18T12:00:00Z",
+  "source": "api-service",
+  "correlationId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "payload": {}
+}
