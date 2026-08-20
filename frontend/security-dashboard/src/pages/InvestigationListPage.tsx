@@ -5,6 +5,7 @@ import { Card, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/Badge'
 import { readRecentInvestigations } from '@/utils/recentInvestigations'
 import { formatWhen } from '@/utils/format'
+import { DEMO_CVES } from '@/data/demoCves'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -39,20 +40,17 @@ export function InvestigationListPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card>
-          <CardTitle>Example demo CVE</CardTitle>
-          <p className="font-mono text-2xl text-white">CVE-2021-44228</p>
-          <p className="mt-2 text-sm text-slate-400">
-            Seeded Log4Shell. Start an investigation to load live threat, assets, risk, and remediation.
-          </p>
-        </Card>
-        <Card>
-          <CardTitle>What you will see</CardTitle>
-          <p className="text-sm text-slate-300">
-            Orchestrator decisions, agent pipeline, deterministic risk, and a RAG/demo recommendation. No fake scores.
-          </p>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {DEMO_CVES.map((row) => (
+          <Card key={row.id}>
+            <CardTitle>{row.title}</CardTitle>
+            <p className="font-mono text-lg text-white">{row.id}</p>
+            <p className="mt-2 text-sm text-slate-400">{row.detail}</p>
+            <Link to={`/investigations/new?cve=${encodeURIComponent(row.id)}`} className="mt-3 inline-block">
+              <Button type="button">Investigate</Button>
+            </Link>
+          </Card>
+        ))}
         <Card>
           <CardTitle>Open by ID</CardTitle>
           <form onSubmit={onLookup} className="flex flex-col gap-2">

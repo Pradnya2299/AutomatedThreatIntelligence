@@ -30,8 +30,8 @@ export function SettingsPage() {
       <Card>
         <CardTitle>Demo AI</CardTitle>
         <p className="text-sm text-slate-300">
-          When ai-service runs with AI_DEMO_MODE=true, remediation cards show Demo AI / [DEMO MODE] text from the API.
-          The UI never claims a mock plan came from OpenAI. Multi-agent investigations are under /investigations.
+          When OPENAI_API_KEY is set, Start code remediation shows LLM POWERED. An empty key uses DEMO MODE
+          (structured fixture patches, not OpenAI). Restart ai-service after changing .env.
         </p>
       </Card>
     </div>

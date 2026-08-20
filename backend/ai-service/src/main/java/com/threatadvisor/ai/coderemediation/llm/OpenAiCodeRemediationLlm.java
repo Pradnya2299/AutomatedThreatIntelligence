@@ -5,11 +5,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.chat.completions.StructuredChatCompletion;
 import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.threatadvisor.ai.config.AiProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
 
-@Service
-@ConditionalOnProperty(name = "ai.demo-mode", havingValue = "false")
 public class OpenAiCodeRemediationLlm implements CodeRemediationLlm {
 
     static final String ANALYSIS_SYSTEM = """

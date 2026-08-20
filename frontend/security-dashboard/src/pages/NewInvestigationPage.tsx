@@ -1,17 +1,20 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState, type FormEvent } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { ErrorState } from '@/components/LoadingState'
 import { createInvestigation } from '@/services/api/investigations'
 import { ApiError } from '@/services/api/client'
 import { rememberInvestigation } from '@/utils/recentInvestigations'
+import { DEMO_CVES } from '@/data/demoCves'
 
 export function NewInvestigationPage() {
   const navigate = useNavigate()
-  const [cveId, setCveId] = useState('CVE-2021-44228')
+  const [params] = useSearchParams()
+  const [cveId, setCveId] = useState(params.get('cve') || 'CVE-2021-44228')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const selected = useMemo(() => DEMO_CVES.find((row) => row.id === cveId), [cveId])
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -37,7 +40,22 @@ export function NewInvestigationPage() {
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-2xl font-semibold text-white">Start investigation</h1>
       <Card>
-        <CardTitle>CVE ID</CardTitle>
+        <CardTitle>Pick a seeded CVE</CardTitle>
+        <div className="mb-3 grid grid-cols-1 gap-2">
+          {DEMO_CVES.map((row) => (
+            <button
+              key={row.id}
+              type="button"
+              onClick={() => setCveId(row.id)}
+              className={`rounded-md border px-3 py-2 text-left text-sm ${
+                cveId === row.id ? 'border-accent bg-[#122038] text-white' : 'border-border text-slate-300'
+              }`}
+            >
+              <span className="font-mono">{row.id}</span>
+              <span className="mt-0.5 block text-xs text-slate-400">{row.title}</span>
+            </button>
+          ))}
+        </div>
         <form onSubmit={onSubmit} className="space-y-3">
           <input
             value={cveId}
@@ -47,8 +65,8 @@ export function NewInvestigationPage() {
             required
           />
           <p className="text-xs text-slate-500">
-            Calls POST /api/v1/investigations on api-service. Uses seeded CVE data when present. No fake investigation
-            is created in the browser.
+            {selected?.detail ||
+              'Calls POST /api/v1/investigations. Uses seeded or NVD data. The browser does not invent CVEs.'}
           </p>
           {error && <ErrorState message={error} onRetry={() => setError(null)} />}
           <Button type="submit" disabled={busy}>

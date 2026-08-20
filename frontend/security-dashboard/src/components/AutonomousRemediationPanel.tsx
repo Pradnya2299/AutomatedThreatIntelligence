@@ -17,7 +17,7 @@ import type { CodeRemediation } from '@/types/codeRemediation'
 export function AutonomousRemediationPanel({ investigation }: { investigation: Investigation }) {
   const queryClient = useQueryClient()
   const [showDiff, setShowDiff] = useState(true)
-  const [example, setExample] = useState<'mapped' | 'maven' | 'docker' | 'source' | 'empty'>('mapped')
+  const [example, setExample] = useState<'mapped' | 'maven' | 'docker' | 'source' | 'empty'>('maven')
   const query = useQuery({
     queryKey: ['code-remediation', investigation.investigationId],
     queryFn: async () => {
@@ -86,8 +86,8 @@ export function AutonomousRemediationPanel({ investigation }: { investigation: I
       {!job && !query.isLoading ? (
         <div className="space-y-3">
           <p className="text-sm text-slate-300">
-            Pick a demo target. Maven, Docker, and source-hash are isolated fixture workspaces. Empty shows
-            REVIEW_REQUIRED.
+            Pick a demo target, then Start. The next page is an isolated workspace patch for review.
+            GitHub PRs stay skipped unless GITHUB_ENABLED=true. Default example patches Maven Log4j in a fixture repo.
           </p>
           <label className="block text-xs text-slate-500">
             Example

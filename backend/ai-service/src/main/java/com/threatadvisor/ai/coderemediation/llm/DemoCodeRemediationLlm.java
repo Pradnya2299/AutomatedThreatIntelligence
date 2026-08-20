@@ -3,9 +3,6 @@ package com.threatadvisor.ai.coderemediation.llm;
 import com.threatadvisor.ai.coderemediation.CodeContextSelector;
 import com.threatadvisor.ai.coderemediation.patch.DockerfilePatcher;
 import com.threatadvisor.ai.coderemediation.patch.MavenDependencyPatcher;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -13,10 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Deterministic structured stand-in used when AI_DEMO_MODE=true. Not an OpenAI response.
+ * Deterministic structured stand-in used when OPENAI_API_KEY is empty. Not an OpenAI response.
  */
-@Service
-@ConditionalOnProperty(name = "ai.demo-mode", havingValue = "true", matchIfMissing = true)
 public class DemoCodeRemediationLlm implements CodeRemediationLlm {
 
     private static final Pattern FILE = Pattern.compile("--- FILE: (.+)\\n([\\s\\S]*?)--- END FILE: \\1\\n");

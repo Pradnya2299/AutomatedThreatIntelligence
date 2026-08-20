@@ -92,11 +92,33 @@ public class AiCodeRemediationClient {
             return new ApiException(HttpStatus.NOT_FOUND, "REMEDIATION_NOT_FOUND", "Unknown code remediation");
         }
         if (ex.getStatusCode().value() == 409) {
-            return new ApiException(HttpStatus.CONFLICT, "CODE_REMEDIATION_CONFLICT", "Code remediation cannot proceed");
+            return new ApiException(HttpStatus.CONFLICT, "CODE_REMEDIATION_CONFLICT",
+                    firstNonBlank(readMessage(ex), "Code remediation cannot proceed"));
         }
         return new ApiException(
                 HttpStatus.valueOf(ex.getStatusCode().value()),
                 "REMEDIATION_UPSTREAM",
-                "ai-service rejected the code remediation request");
+                firstNonBlank(readMessage(ex), "ai-service rejected the code remediation request"));
+    }
+
+    private static String readMessage(RestClientResponseException ex) {
+        String body = ex.getResponseBodyAsString();
+        if (body == null || body.isBlank()) {
+            return ex.getStatusText();
+        }
+        int msg = body.indexOf("\"message\"");
+        if (msg >= 0) {
+            int colon = body.indexOf(':', msg);
+            int start = body.indexOf('"', colon + 1);
+            int end = start >= 0 ? body.indexOf('"', start + 1) : -1;
+            if (start >= 0 && end > start) {
+                return body.substring(start + 1, end);
+            }
+        }
+        return body.length() > 280 ? body.substring(0, 277) + "..." : body;
+    }
+
+    private static String firstNonBlank(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 }

@@ -226,9 +226,19 @@ class CodeRemediationServiceTest {
     }
 
     @Test
-    void missingRepositoryMappingIsReviewRequired() {
+    void log4jWithoutBindingUsesPaymentFixture() {
         UUID investigationId = UUID.randomUUID();
         when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId)));
+        when(bindings.findByHostnameIgnoreCase("nw-prod-app-01")).thenReturn(List.of());
+        CodeRemediationResponse response = service.start(investigationId, new CodeRemediationRequest(null, null, null, null, null, null), "analyst");
+        assertEquals("AWAITING_APPROVAL", response.currentState());
+        assertNotNull(response.patch());
+    }
+
+    @Test
+    void missingRepositoryMappingIsReviewRequired() {
+        UUID investigationId = UUID.randomUUID();
+        when(orchestrator.get(investigationId)).thenReturn(Optional.of(completedInvestigation(investigationId, "CVE-2023-22515")));
         when(bindings.findByHostnameIgnoreCase("nw-prod-app-01")).thenReturn(List.of());
         CodeRemediationResponse response = service.start(investigationId, new CodeRemediationRequest(null, null, null, null, null, null), "analyst");
         assertEquals("REVIEW_REQUIRED", response.currentState());
@@ -289,9 +299,13 @@ class CodeRemediationServiceTest {
     }
 
     private static SecurityInvestigationContext completedInvestigation(UUID id) {
+        return completedInvestigation(id, "CVE-2021-44228");
+    }
+
+    private static SecurityInvestigationContext completedInvestigation(UUID id, String cveId) {
         return SecurityInvestigationContext.builder()
                 .investigationId(id)
-                .cveId("CVE-2021-44228")
+                .cveId(cveId)
                 .status(InvestigationStatus.COMPLETED)
                 .threat(new ThreatIntelligenceResult(
                         "CVE-2021-44228",

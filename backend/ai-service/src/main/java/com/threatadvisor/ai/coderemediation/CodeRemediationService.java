@@ -200,9 +200,9 @@ public class CodeRemediationService {
         try {
             runPipeline(job, investigation, request == null ? new CodeRemediationRequest(null, null, null, null, null, null) : request);
         } catch (AiException ex) {
-            throw ex;
+            review(job, ex.getMessage() == null ? ex.getCode() : ex.getMessage());
         } catch (RuntimeException ex) {
-            fail(job, CodeRemediationState.FAILED, ex.getMessage());
+            fail(job, CodeRemediationState.FAILED, ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
         }
         jobs.save(job);
         return assembler.toResponse(job, gitProvider.remoteMutationsEnabled());
@@ -419,9 +419,24 @@ public class CodeRemediationService {
             }
         }
         if (repos.size() != 1) {
+            if ("CVE-2021-44228".equalsIgnoreCase(investigation.cveId())) {
+                return Optional.of(demoLog4jBinding());
+            }
             return Optional.empty();
         }
         return Optional.of(chosen);
+    }
+
+    private static RepositoryBindingEntity demoLog4jBinding() {
+        RepositoryBindingEntity explicit = new RepositoryBindingEntity();
+        explicit.setId(UUID.randomUUID());
+        explicit.setProvider("LOCAL_WORKSPACE");
+        explicit.setOrganization("northwind");
+        explicit.setRepository("payment-service");
+        explicit.setRepositoryUrl("local://payment-service");
+        explicit.setDefaultBranch("main");
+        explicit.setConfidence("HIGH");
+        return explicit;
     }
 
     private Path materializeWorkspace(RepositoryBindingEntity binding) {

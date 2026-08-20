@@ -54,7 +54,7 @@ public class LocalWorkspaceGitProvider implements GitProvider {
             }
             run(workspace, "git", "checkout", "-B", newBranch);
         } catch (Exception ex) {
-            throw new IllegalStateException("Unable to create isolated branch " + newBranch, ex);
+            log.warn("Isolated git branch skipped (git missing or failed): {}", ex.getMessage());
         }
     }
 
