@@ -1,0 +1,15 @@
+# Local overrides
+app:
+  security:
+    admin:
+      username: ${LOCAL_ADMIN_USERNAME:admin}
+      password: ${LOCAL_ADMIN_PASSWORD:admin_change_me}
+    analyst:
+      username: ${LOCAL_ANALYST_USERNAME:analyst}
+      password: ${LOCAL_ANALYST_PASSWORD:analyst_change_me}
+    manager:
+      username: ${LOCAL_MANAGER_USERNAME:manager}
+      password: ${LOCAL_MANAGER_PASSWORD:manager_change_me}
+    viewer:
+      username: ${LOCAL_VIEWER_USERNAME:viewer}
+      password: ${LOCAL_VIEWER_PASSWORD:viewer_change_me}
