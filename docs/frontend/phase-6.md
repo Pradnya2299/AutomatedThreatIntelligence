@@ -51,6 +51,13 @@ There is **no** investigation list API. The UI does not fabricate a catalog. Ses
 
 Do not commit real secrets. Defaults match `.env.example` local-dev credentials.
 
+If Vulnerabilities / Findings / Remediation show **Unable to load vulnerability data**:
+
+1. Confirm api-service is running: `curl -u analyst:analyst_change_me http://127.0.0.1:8080/api/health`
+2. Leave `VITE_API_BASE_URL` empty so the browser uses `http://localhost:5173/api/...` (Vite proxy to 8080). Restart `npm run dev` after changing `.env`.
+3. Apply schema and seed: `./scripts/migrate.sh` then `./scripts/seed-database.sh`
+4. Open the dashboard as `http://localhost:5173`, not a LAN IP, unless api-service CORS allows that origin.
+
 `AI_DEMO_MODE=true` is a **backend** flag. The dashboard displays `[DEMO MODE]` text when the API returns it.
 
 ## Authentication

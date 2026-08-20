@@ -11,10 +11,34 @@ export class ApiError extends Error {
 
 const user = import.meta.env.VITE_API_USER || 'analyst'
 const password = import.meta.env.VITE_API_PASSWORD || 'analyst_change_me'
-const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+const apiBase = resolveApiBase(import.meta.env.VITE_API_BASE_URL, Boolean(import.meta.env.DEV))
 
 export function apiOrigin(): string {
   return apiBase || 'http://localhost:8080'
+}
+
+/** Empty / local api-service URLs use the Vite `/api` proxy so the browser is same-origin. */
+export function resolveApiBase(raw: unknown, isDev: boolean): string {
+  const trimmed = String(raw ?? '')
+    .trim()
+    .replace(/\/$/, '')
+    .replace(/\/api$/i, '')
+  if (!trimmed) {
+    return ''
+  }
+  if (isDev) {
+    try {
+      const url = new URL(trimmed)
+      const localHost = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+      const apiPort = url.port === '' || url.port === '8080'
+      if (localHost && apiPort) {
+        return ''
+      }
+    } catch {
+      return ''
+    }
+  }
+  return trimmed
 }
 
 function apiUrl(path: string): string {
@@ -22,7 +46,11 @@ function apiUrl(path: string): string {
 }
 
 function basicAuthHeader(): string {
-  return `Basic ${btoa(`${user}:${password}`)}`
+  const token = `${user}:${password}`
+  if (typeof btoa === 'function') {
+    return `Basic ${btoa(token)}`
+  }
+  return `Basic ${Buffer.from(token, 'utf8').toString('base64')}`
 }
 
 function requestHeaders(json = false): HeadersInit {
@@ -52,20 +80,34 @@ async function parseError(response: Response): Promise<ApiError> {
       message = 'API authentication failed. Start api-service and check analyst credentials.'
     } else if (response.status === 404) {
       message = 'The requested record was not found.'
+    } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+      message = `api-service is not reachable through the dashboard proxy. Start it on port 8080.`
     } else if (response.status >= 500) {
-      message = `The API is unavailable. Start api-service at ${apiOrigin()}.`
+      message = `The API is unavailable. Start api-service on port 8080.`
     }
   }
   if (response.status === 401) {
     message = 'API authentication failed. Start api-service and check analyst credentials.'
   } else if (response.status === 404) {
-    message = 'The requested record was not found.'
-  } else if (response.status >= 500 || looksLikeStackTrace(message)) {
-    message = `The API is unavailable. Start api-service at ${apiOrigin()}.`
+    message = 'The requested record was not found. Confirm api-service is running and VITE_API_BASE_URL is empty so the Vite proxy is used.'
+  } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+    message = 'api-service is not reachable. Start it on port 8080, then retry.'
+  } else if (looksLikeStackTrace(message)) {
+    message = 'The API is unavailable. Start api-service on port 8080.'
   } else if (message.length > 280) {
     message = message.slice(0, 277) + '...'
   }
   return new ApiError(response.status, message, code)
+}
+
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && error.message) {
+    return error.message
+  }
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  return fallback
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
@@ -73,7 +115,10 @@ export async function apiGet<T>(path: string): Promise<T> {
   try {
     response = await fetch(apiUrl(path), { headers: requestHeaders() })
   } catch {
-    throw new ApiError(0, `Unable to reach the API at ${apiOrigin()}.`)
+    throw new ApiError(
+      0,
+      'Unable to reach api-service. Start it on port 8080 and open the dashboard at http://localhost:5173 (leave VITE_API_BASE_URL empty).',
+    )
   }
   if (!response.ok) {
     throw await parseError(response)
@@ -90,7 +135,10 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
       body: JSON.stringify(body),
     })
   } catch {
-    throw new ApiError(0, `Unable to reach the API at ${apiOrigin()}.`)
+    throw new ApiError(
+      0,
+      'Unable to reach api-service. Start it on port 8080 and open the dashboard at http://localhost:5173 (leave VITE_API_BASE_URL empty).',
+    )
   }
   if (!response.ok) {
     throw await parseError(response)

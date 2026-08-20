@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const apiUser = process.env.VITE_API_USER || process.env.LOCAL_ANALYST_USERNAME || 'analyst'
 const apiPassword = process.env.VITE_API_PASSWORD || process.env.LOCAL_ANALYST_PASSWORD || 'analyst_change_me'
+const apiProxyTarget = process.env.API_PROXY_TARGET || 'http://127.0.0.1:8080'
 
 export default defineConfig({
   envDir: path.resolve(rootDir, '../..'),
@@ -20,12 +21,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: apiProxyTarget,
         changeOrigin: true,
         auth: `${apiUser}:${apiPassword}`,
       },
       '/actuator': {
-        target: 'http://localhost:8080',
+        target: apiProxyTarget,
         changeOrigin: true,
       },
     },

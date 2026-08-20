@@ -90,6 +90,14 @@ class InfrastructureFoundationTest {
                 assertTrue(rs.next());
                 assertEquals(1, rs.getInt(1), "scenario A inventory must exist");
             }
+            try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM findings")) {
+                assertTrue(rs.next());
+                assertTrue(rs.getInt(1) >= 5, "expected seeded catalog findings");
+            }
+            try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM remediation_plans")) {
+                assertTrue(rs.next());
+                assertTrue(rs.getInt(1) >= 3, "expected seeded catalog remediation plans");
+            }
             try (ResultSet rs = conn.createStatement().executeQuery(
                     "SELECT COUNT(*) FROM knowledge_chunks WHERE embedding IS NULL")) {
                 assertTrue(rs.next());

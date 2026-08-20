@@ -1,8 +1,8 @@
 -- Demo seed for local development (fictional org "Northwind Financial").
 -- LOCAL DEVELOPMENT DATA ONLY. Apply after Flyway: ./scripts/seed-database.sh
 --
--- Correlation is NOT executed here. Inventory + CVE/CPE rows are arranged so a later
--- engine can produce findings for the labeled scenarios.
+-- Inventory + CVE/CPE rows match labeled scenarios. Demo findings, risk, and
+-- remediation rows populate the catalog tabs after seed. Live engines may add more.
 
 INSERT INTO organizations (id, name, slug)
 VALUES ('11111111-1111-1111-1111-111111111111', 'Northwind Financial', 'northwind')
@@ -156,6 +156,102 @@ INSERT INTO vulnerability_cpe (id, vulnerability_id, cpe, vendor, product, versi
     ('f0000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000004', 'cpe:2.3:a:atlassian:confluence_data_center:*:*:*:*:*:*:*:*', 'atlassian', 'confluence', '8.0.0', '8.5.3'),
     ('f0000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000005', 'cpe:2.3:o:microsoft:windows_11:-:*:*:*:*:*:*:*', 'microsoft', 'windows', NULL, NULL),
     ('f0000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000006', 'cpe:2.3:a:apache:http_server:*:*:*:*:*:*:*:*', 'apache', 'http_server', '2.4.0', '2.4.56')
+ON CONFLICT (id) DO NOTHING;
+
+-- Catalog demo rows so Vulnerabilities / Findings / Remediation tabs have data without
+-- waiting for a live correlation + risk + AI pipeline. Engines may insert additional
+-- rows; unique keys keep this idempotent.
+INSERT INTO findings (
+    id, organization_id, asset_id, vulnerability_id, status, match_type, match_confidence, match_explanation, detected_at
+) VALUES
+    ('a1000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000001', 'OPEN',
+     'VERSION_RANGE_MATCH', 'HIGH',
+     '{"text":"nw-prod-app-01 runs Apache Log4j 2.14.1, inside the Log4Shell affected range."}'::jsonb,
+     '2024-06-01T12:00:00Z'),
+    ('a1000000-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-000000000019', 'e0000000-0000-0000-0000-000000000001', 'OPEN',
+     'VERSION_RANGE_MATCH', 'HIGH',
+     '{"text":"nw-prod-edge-gw-01 is internet-facing and runs Apache Log4j 2.14.1."}'::jsonb,
+     '2024-06-01T12:05:00Z'),
+    ('a1000000-0000-0000-0000-000000000003', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-00000000000b', 'e0000000-0000-0000-0000-000000000001', 'OPEN',
+     'VERSION_RANGE_MATCH', 'MEDIUM',
+     '{"text":"nw-stg-app-01 staging host runs Apache Log4j 2.14.1."}'::jsonb,
+     '2024-06-01T12:10:00Z'),
+    ('a1000000-0000-0000-0000-000000000004', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-00000000000a', 'e0000000-0000-0000-0000-000000000002', 'OPEN',
+     'VERSION_RANGE_MATCH', 'HIGH',
+     '{"text":"nw-edge-vpn-01 runs OpenSSL 3.0.2, inside CVE-2022-3602 range."}'::jsonb,
+     '2024-06-01T12:15:00Z'),
+    ('a1000000-0000-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111',
+     'c0000000-0000-0000-0000-00000000001c', 'e0000000-0000-0000-0000-000000000006', 'OPEN',
+     'VERSION_RANGE_MATCH', 'HIGH',
+     '{"text":"nw-prod-httpd-vuln-01 runs Apache HTTP Server 2.4.49."}'::jsonb,
+     '2024-06-01T12:20:00Z')
+ON CONFLICT (asset_id, vulnerability_id) DO NOTHING;
+
+INSERT INTO risk_assessments (
+    id, finding_id, technical_risk, exploitability_score, exposure_score, business_impact_score,
+    asset_criticality_score, final_risk_score, risk_level, formula_version, reasons, calculated_at
+)
+SELECT v.id, v.finding_id, v.technical_risk, v.exploitability_score, v.exposure_score, v.business_impact_score,
+       v.asset_criticality_score, v.final_risk_score, v.risk_level, v.formula_version, v.reasons, v.calculated_at
+FROM (
+    VALUES
+    ('b1000000-0000-0000-0000-000000000001'::uuid, 'a1000000-0000-0000-0000-000000000001'::uuid,
+     100::numeric, 75::numeric, 0::numeric, 100::numeric, 100::numeric, 88.8::numeric, 'CRITICAL', 'v1-seed',
+     '{"text":"Seeded CRITICAL risk for Log4Shell on nw-prod-app-01."}'::jsonb, '2024-06-01T12:30:00Z'::timestamptz),
+    ('b1000000-0000-0000-0000-000000000002'::uuid, 'a1000000-0000-0000-0000-000000000002'::uuid,
+     100::numeric, 75::numeric, 100::numeric, 100::numeric, 100::numeric, 97.5::numeric, 'CRITICAL', 'v1-seed',
+     '{"text":"Seeded CRITICAL risk for internet-facing Log4Shell on nw-prod-edge-gw-01."}'::jsonb, '2024-06-01T12:31:00Z'::timestamptz),
+    ('b1000000-0000-0000-0000-000000000003'::uuid, 'a1000000-0000-0000-0000-000000000003'::uuid,
+     100::numeric, 75::numeric, 0::numeric, 50::numeric, 50::numeric, 62.5::numeric, 'HIGH', 'v1-seed',
+     '{"text":"Seeded HIGH risk for staging Log4Shell on nw-stg-app-01."}'::jsonb, '2024-06-01T12:32:00Z'::timestamptz),
+    ('b1000000-0000-0000-0000-000000000004'::uuid, 'a1000000-0000-0000-0000-000000000004'::uuid,
+     75::numeric, 50::numeric, 100::numeric, 100::numeric, 100::numeric, 81.3::numeric, 'HIGH', 'v1-seed',
+     '{"text":"Seeded HIGH risk for OpenSSL on nw-edge-vpn-01."}'::jsonb, '2024-06-01T12:33:00Z'::timestamptz),
+    ('b1000000-0000-0000-0000-000000000005'::uuid, 'a1000000-0000-0000-0000-000000000005'::uuid,
+     98::numeric, 50::numeric, 100::numeric, 75::numeric, 75::numeric, 84.4::numeric, 'HIGH', 'v1-seed',
+     '{"text":"Seeded HIGH risk for Apache HTTP Server on nw-prod-httpd-vuln-01."}'::jsonb, '2024-06-01T12:34:00Z'::timestamptz)
+) AS v(id, finding_id, technical_risk, exploitability_score, exposure_score, business_impact_score,
+      asset_criticality_score, final_risk_score, risk_level, formula_version, reasons, calculated_at)
+WHERE EXISTS (SELECT 1 FROM findings f WHERE f.id = v.finding_id)
+ON CONFLICT (finding_id) DO NOTHING;
+
+INSERT INTO remediation_plans (
+    id, finding_id, risk_assessment_id, status, priority, summary, reason, recommended_action,
+    patch_version, temporary_mitigation, model_name, prompt_version
+)
+SELECT v.id, v.finding_id, v.risk_assessment_id, v.status, v.priority, v.summary, v.reason, v.recommended_action,
+       v.patch_version, v.temporary_mitigation, v.model_name, v.prompt_version
+FROM (
+    VALUES
+    ('c1000000-0000-0000-0000-000000000001'::uuid, 'a1000000-0000-0000-0000-000000000001'::uuid,
+     'b1000000-0000-0000-0000-000000000001'::uuid, 'GENERATED', 'IMMEDIATE',
+     'Upgrade Log4j on nw-prod-app-01 to 2.17.1 or later.',
+     'Seeded catalog plan for local dashboard demo. Not an OpenAI-generated body.',
+     'Upgrade org.apache.logging.log4j:log4j-core to 2.17.1, rebuild, and redeploy payment-service.',
+     '2.17.1', 'If patching is delayed, remove JndiLookup from the classpath.',
+     'demo-seed', 'seed-v1'),
+    ('c1000000-0000-0000-0000-000000000002'::uuid, 'a1000000-0000-0000-0000-000000000002'::uuid,
+     'b1000000-0000-0000-0000-000000000002'::uuid, 'GENERATED', 'IMMEDIATE',
+     'Upgrade Log4j on internet-facing nw-prod-edge-gw-01 immediately.',
+     'Seeded catalog plan for local dashboard demo. Not an OpenAI-generated body.',
+     'Patch Log4j to 2.17.1+, restrict outbound LDAP/JNDI, and verify with a dependency scan.',
+     '2.17.1', 'Block outbound LDAP from the edge gateway until patched.',
+     'demo-seed', 'seed-v1'),
+    ('c1000000-0000-0000-0000-000000000003'::uuid, 'a1000000-0000-0000-0000-000000000004'::uuid,
+     'b1000000-0000-0000-0000-000000000004'::uuid, 'GENERATED', 'URGENT',
+     'Upgrade OpenSSL on nw-edge-vpn-01 to 3.0.7 or later.',
+     'Seeded catalog plan for local dashboard demo. Not an OpenAI-generated body.',
+     'Apply distro OpenSSL 3.0.7+ packages and restart VPN services.',
+     '3.0.7', 'Restrict management access to the VPN concentrator.',
+     'demo-seed', 'seed-v1')
+) AS v(id, finding_id, risk_assessment_id, status, priority, summary, reason, recommended_action,
+      patch_version, temporary_mitigation, model_name, prompt_version)
+WHERE EXISTS (SELECT 1 FROM findings f WHERE f.id = v.finding_id)
+  AND EXISTS (SELECT 1 FROM risk_assessments r WHERE r.id = v.risk_assessment_id)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO knowledge_documents (id, organization_id, title, document_type, source, body) VALUES

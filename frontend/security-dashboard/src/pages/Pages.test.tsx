@@ -43,6 +43,18 @@ describe('core pages', () => {
     expect(screen.getByText('Log4Shell')).toBeInTheDocument()
   })
 
+  it('shows the API error when vulnerability list fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
+    renderApp(<VulnerabilitiesPage />, '/vulnerabilities')
+    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    expect(screen.getByRole('alert').textContent).toMatch(/api-service/i)
+  })
+
   it('renders finding detail including match explanation and risk', async () => {
     vi.stubGlobal(
       'fetch',

@@ -6,6 +6,7 @@ import { EmptyState, ErrorBanner } from '@/components/States'
 import { Pager } from '@/components/Pager'
 import { PageSkeleton } from '@/components/Skeleton'
 import { getRemediationPlans } from '@/services/api'
+import { apiErrorMessage } from '@/services/api/client'
 import { formatScore, formatWhen } from '@/utils/format'
 
 export function RemediationPage() {
@@ -44,8 +45,13 @@ export function RemediationPage() {
         </select>
       </div>
       {query.isLoading && <PageSkeleton />}
-      {query.isError && <ErrorBanner message="Unable to load remediation plans. Please try again." onRetry={() => void query.refetch()} />}
-      {query.data?.content.length === 0 && <EmptyState title="No AI remediation plans." />}
+      {query.isError && <ErrorBanner message={apiErrorMessage(query.error, 'Unable to load remediation plans. Please try again.')} onRetry={() => void query.refetch()} />}
+      {query.data?.content.length === 0 && (
+        <EmptyState
+          title="No AI remediation plans."
+          detail="Re-run ./scripts/seed-database.sh for demo plans, or complete an investigation so ai-service can write GENERATED plans."
+        />
+      )}
       {query.data && query.data.content.length > 0 && (
         <>
           <DataTable headers={['CVE', 'Asset', 'Risk', 'Priority', 'AI status', 'Created', 'Action']}>

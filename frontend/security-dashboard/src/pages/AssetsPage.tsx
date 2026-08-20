@@ -6,6 +6,7 @@ import { EmptyState, ErrorBanner } from '@/components/States'
 import { Pager } from '@/components/Pager'
 import { PageSkeleton } from '@/components/Skeleton'
 import { getAssets } from '@/services/api'
+import { apiErrorMessage } from '@/services/api/client'
 
 export function AssetsPage() {
   const [params, setParams] = useSearchParams()
@@ -18,7 +19,7 @@ export function AssetsPage() {
     <div>
       <h1 className="mb-4 text-2xl font-semibold text-white">Assets</h1>
       {query.isLoading && <PageSkeleton />}
-      {query.isError && <ErrorBanner message="Unable to load assets. Please try again." onRetry={() => void query.refetch()} />}
+      {query.isError && <ErrorBanner message={apiErrorMessage(query.error, 'Unable to load assets. Please try again.')} onRetry={() => void query.refetch()} />}
       {query.data?.content.length === 0 && <EmptyState title="No assets found." />}
       {query.data && query.data.content.length > 0 && (
         <>

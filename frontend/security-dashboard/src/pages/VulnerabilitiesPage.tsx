@@ -7,6 +7,7 @@ import { EmptyState, ErrorBanner } from '@/components/States'
 import { Pager } from '@/components/Pager'
 import { PageSkeleton } from '@/components/Skeleton'
 import { getVulnerabilities } from '@/services/api'
+import { apiErrorMessage } from '@/services/api/client'
 import { formatScore, formatWhen } from '@/utils/format'
 
 export function VulnerabilitiesPage() {
@@ -73,9 +74,14 @@ export function VulnerabilitiesPage() {
       {filters}
       {query.isLoading && <PageSkeleton />}
       {query.isError && (
-        <ErrorBanner message="Unable to load vulnerability data. Please try again." onRetry={() => void query.refetch()} />
+        <ErrorBanner message={apiErrorMessage(query.error, 'Unable to load vulnerability data. Please try again.')} onRetry={() => void query.refetch()} />
       )}
-      {query.data && query.data.content.length === 0 && <EmptyState title="No vulnerabilities found." />}
+      {query.data && query.data.content.length === 0 && (
+        <EmptyState
+          title="No vulnerabilities found."
+          detail="Run ./scripts/migrate.sh then ./scripts/seed-database.sh, and confirm api-service is running on port 8080."
+        />
+      )}
       {query.data && query.data.content.length > 0 && (
         <>
           <DataTable headers={['CVE', 'Description', 'Severity', 'CVSS', 'Affected assets', 'Risk', 'Published', 'Status']}>

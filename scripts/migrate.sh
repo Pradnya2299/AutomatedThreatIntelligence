@@ -2,12 +2,9 @@
 # Apply canonical Flyway migrations to local Postgres using the Flyway Docker image.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-if [[ -f "${ROOT}/.env" ]]; then
-  set -a
-  # shellcheck source=/dev/null
-  source "${ROOT}/.env"
-  set +a
-fi
+# shellcheck source=load-env.sh
+source "${ROOT}/scripts/load-env.sh"
+load_dotenv "${ROOT}/.env"
 
 # Join the Compose network and talk to service name "postgres".
 # This works on Docker Desktop (Windows/macOS) and Linux. Avoid --network host.

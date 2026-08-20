@@ -8,7 +8,7 @@ import { RiskBars } from '@/components/RiskBars'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { useDashboardSummary } from '@/hooks/useDashboard'
-import { ApiError } from '@/services/api/client'
+import { ApiError, apiErrorMessage } from '@/services/api/client'
 import { formatScore, formatWhen } from '@/utils/format'
 
 export function DashboardPage() {
@@ -19,9 +19,7 @@ export function DashboardPage() {
     return <PageSkeleton />
   }
   if (summary.isError) {
-    const detail = summary.error instanceof ApiError
-      ? summary.error.message
-      : 'Unable to load dashboard data. Please try again.'
+    const detail = apiErrorMessage(summary.error, 'Unable to load dashboard data. Please try again.')
     const hint = summary.error instanceof ApiError && summary.error.status === 401
       ? ' Authentication failed. Start api-service on port 8080 and use analyst / analyst_change_me.'
       : ' Confirm api-service is running on port 8080.'

@@ -6,6 +6,7 @@ import { EmptyState, ErrorBanner } from '@/components/States'
 import { Pager } from '@/components/Pager'
 import { PageSkeleton } from '@/components/Skeleton'
 import { getFindings } from '@/services/api'
+import { apiErrorMessage } from '@/services/api/client'
 import { formatScore, formatWhen } from '@/utils/format'
 
 export function FindingsPage() {
@@ -44,8 +45,13 @@ export function FindingsPage() {
         </select>
       </div>
       {query.isLoading && <PageSkeleton />}
-      {query.isError && <ErrorBanner message="Unable to load findings. Please try again." onRetry={() => void query.refetch()} />}
-      {query.data?.content.length === 0 && <EmptyState title="No findings found." />}
+      {query.isError && <ErrorBanner message={apiErrorMessage(query.error, 'Unable to load findings. Please try again.')} onRetry={() => void query.refetch()} />}
+      {query.data?.content.length === 0 && (
+        <EmptyState
+          title="No findings found."
+          detail="Seed demo_seed.sql (catalog rows) or run correlation for a CVE such as CVE-2021-44228."
+        />
+      )}
       {query.data && query.data.content.length > 0 && (
         <>
           <DataTable headers={['Asset', 'CVE', 'Match type', 'Confidence', 'Risk', 'Status', 'Detected']}>
