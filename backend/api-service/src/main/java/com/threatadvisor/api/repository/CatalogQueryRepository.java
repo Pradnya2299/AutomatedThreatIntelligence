@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -228,15 +229,15 @@ public class CatalogQueryRepository {
 
     public PageResponse<RemediationListItem> remediations(String priority, String status, String risk, int page, int size) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("priority", blank(priority))
-                .addValue("status", blank(status))
-                .addValue("risk", blank(risk))
                 .addValue("size", size)
                 .addValue("offset", page * size);
+        addVarchar(params, "priority", blank(priority));
+        addVarchar(params, "status", blank(status));
+        addVarchar(params, "risk", blank(risk));
         String where = """
-                WHERE (:priority IS NULL OR rp.priority = :priority)
-                  AND (:status IS NULL OR rp.status = :status)
-                  AND (:risk IS NULL OR r.risk_level = :risk)
+                WHERE (CAST(:priority AS VARCHAR) IS NULL OR rp.priority = CAST(:priority AS VARCHAR))
+                  AND (CAST(:status AS VARCHAR) IS NULL OR rp.status = CAST(:status AS VARCHAR))
+                  AND (CAST(:risk AS VARCHAR) IS NULL OR r.risk_level = CAST(:risk AS VARCHAR))
                 """;
         Long total = jdbc.queryForObject(
                 """
@@ -315,22 +316,23 @@ public class CatalogQueryRepository {
 
     private static String vulnWhere() {
         return """
-                WHERE (:qLike IS NULL OR v.cve_id ILIKE :qLike
+                WHERE (CAST(:qLike AS VARCHAR) IS NULL OR v.cve_id ILIKE CAST(:qLike AS VARCHAR)
                     OR EXISTS (SELECT 1 FROM vulnerability_cpe c WHERE c.vulnerability_id = v.id
-                               AND (c.vendor ILIKE :qLike OR c.product ILIKE :qLike)))
-                  AND (:severity IS NULL OR UPPER(v.severity) = UPPER(:severity))
-                  AND (:risk IS NULL OR EXISTS (
+                               AND (c.vendor ILIKE CAST(:qLike AS VARCHAR) OR c.product ILIKE CAST(:qLike AS VARCHAR))))
+                  AND (CAST(:severity AS VARCHAR) IS NULL OR UPPER(v.severity) = UPPER(CAST(:severity AS VARCHAR)))
+                  AND (CAST(:risk AS VARCHAR) IS NULL OR EXISTS (
                         SELECT 1 FROM findings f JOIN risk_assessments r ON r.finding_id = f.id
-                         WHERE f.vulnerability_id = v.id AND r.risk_level = :risk))
+                         WHERE f.vulnerability_id = v.id AND r.risk_level = CAST(:risk AS VARCHAR)))
                 """;
     }
 
     private static String findingWhere() {
         return """
-                WHERE (:risk IS NULL OR r.risk_level = :risk)
-                  AND (:status IS NULL OR f.status = :status)
-                  AND (:asset IS NULL OR a.hostname ILIKE :assetLike OR CAST(a.id AS text) = :asset)
-                  AND (:cve IS NULL OR v.cve_id ILIKE :cveLike)
+                WHERE (CAST(:risk AS VARCHAR) IS NULL OR r.risk_level = CAST(:risk AS VARCHAR))
+                  AND (CAST(:status AS VARCHAR) IS NULL OR f.status = CAST(:status AS VARCHAR))
+                  AND (CAST(:asset AS VARCHAR) IS NULL OR a.hostname ILIKE CAST(:assetLike AS VARCHAR)
+                       OR CAST(a.id AS text) = CAST(:asset AS VARCHAR))
+                  AND (CAST(:cve AS VARCHAR) IS NULL OR v.cve_id ILIKE CAST(:cveLike AS VARCHAR))
                 """;
     }
 
@@ -339,17 +341,22 @@ public class CatalogQueryRepository {
         String qBlank = blank(q);
         String assetBlank = blank(asset);
         String cveBlank = blank(cve);
-        return new MapSqlParameterSource()
-                .addValue("qLike", qBlank == null ? null : "%" + qBlank + "%")
-                .addValue("severity", blank(severity))
-                .addValue("risk", blank(risk))
-                .addValue("status", blank(status))
-                .addValue("asset", assetBlank)
-                .addValue("assetLike", assetBlank == null ? null : "%" + assetBlank + "%")
-                .addValue("cve", cveBlank)
-                .addValue("cveLike", cveBlank == null ? null : "%" + cveBlank + "%")
+        MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("size", size)
                 .addValue("offset", Math.max(page, 0) * size);
+        addVarchar(params, "qLike", qBlank == null ? null : "%" + qBlank + "%");
+        addVarchar(params, "severity", blank(severity));
+        addVarchar(params, "risk", blank(risk));
+        addVarchar(params, "status", blank(status));
+        addVarchar(params, "asset", assetBlank);
+        addVarchar(params, "assetLike", assetBlank == null ? null : "%" + assetBlank + "%");
+        addVarchar(params, "cve", cveBlank);
+        addVarchar(params, "cveLike", cveBlank == null ? null : "%" + cveBlank + "%");
+        return params;
+    }
+
+    private static void addVarchar(MapSqlParameterSource params, String name, String value) {
+        params.addValue(name, value, Types.VARCHAR);
     }
 
     private long count(String sql) {

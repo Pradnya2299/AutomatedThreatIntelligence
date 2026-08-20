@@ -69,8 +69,23 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error(
                 "INTERNAL_ERROR",
-                "An unexpected error occurred"
+                rootMessage(ex)
         ));
+    }
+
+    private static String rootMessage(Exception ex) {
+        Throwable cause = ex;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        String message = cause.getMessage();
+        if (message == null || message.isBlank()) {
+            return "An unexpected error occurred";
+        }
+        if (message.length() > 280) {
+            return message.substring(0, 277) + "...";
+        }
+        return message;
     }
 
     private static Map<String, Object> error(String code, String message) {
