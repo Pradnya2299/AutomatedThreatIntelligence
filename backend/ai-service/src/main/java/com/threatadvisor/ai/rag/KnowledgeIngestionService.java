@@ -51,7 +51,16 @@ public class KnowledgeIngestionService {
         if (!properties.isIngestOnStartup()) {
             return;
         }
-        ingestClasspath();
+        try {
+            ingestClasspath();
+        } catch (RuntimeException ex) {
+            // ApplicationReadyEvent exceptions abort Spring Boot (Maven spring-boot:run
+            // then reports exit code 1). RAG is optional for LLM code remediation.
+            log.error(
+                    "operation=knowledge.ingest.startup-failed ai-service will keep running; "
+                            + "RAG may be empty until POST /internal/ai/knowledge/ingest succeeds",
+                    ex);
+        }
     }
 
     @Transactional

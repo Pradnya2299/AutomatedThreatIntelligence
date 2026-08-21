@@ -58,7 +58,7 @@ ai:
   top-k: ${AI_RAG_TOP_K:5}
   prompt-version: v1
   cache-ttl-seconds: 3600
-  ingest-on-startup: true
+  ingest-on-startup: ${AI_INGEST_ON_STARTUP:true}
   chunk-size-chars: 2000
   chunk-overlap-chars: 200
   correlation-base-url: ${CORRELATION_SERVICE_URL:http://localhost:8082}
