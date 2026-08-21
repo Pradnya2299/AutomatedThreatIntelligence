@@ -45,11 +45,15 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
             log.warn("operation=dotenv.empty path={}", file.toAbsolutePath());
             return;
         }
-        Object rawKey = values.get("OPENAI_API_KEY");
+            Object rawKey = values.get("OPENAI_API_KEY");
         boolean keyPresent = rawKey instanceof String s && !s.isBlank();
         if (keyPresent) {
             values.put("ai.api-key", rawKey);
             values.put("openai.api-key", rawKey);
+        }
+        Object projectId = values.get("OPENAI_PROJECT_ID");
+        if (projectId instanceof String pid && !pid.isBlank()) {
+            values.put("ai.project-id", pid);
         }
         MapPropertySource source = new MapPropertySource(PROPERTY_SOURCE_NAME, values);
         if (environment.getPropertySources().contains(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)) {

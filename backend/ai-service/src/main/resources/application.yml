@@ -52,6 +52,7 @@ server:
 ai:
   demo-mode: ${AI_DEMO_MODE:true}
   api-key: ${OPENAI_API_KEY:}
+  project-id: ${OPENAI_PROJECT_ID:}
   chat-model: ${OPENAI_MODEL:gpt-4o-mini}
   embedding-model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
   top-k: ${AI_RAG_TOP_K:5}

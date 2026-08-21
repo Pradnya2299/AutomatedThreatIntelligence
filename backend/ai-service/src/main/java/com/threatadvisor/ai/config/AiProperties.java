@@ -7,6 +7,7 @@ public class AiProperties {
 
     private boolean demoMode = true;
     private String apiKey = "";
+    private String projectId = "";
     private String chatModel = "gpt-4o-mini";
     private String embeddingModel = "text-embedding-3-small";
     private int topK = 5;
@@ -41,6 +42,14 @@ public class AiProperties {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public String getProjectId() {
+        return projectId == null ? "" : projectId.trim();
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     public String getChatModel() {

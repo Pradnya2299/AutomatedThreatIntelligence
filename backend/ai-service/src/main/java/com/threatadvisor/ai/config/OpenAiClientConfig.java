@@ -21,7 +21,16 @@ public class OpenAiClientConfig {
         if (key == null || key.isBlank()) {
             return null;
         }
-        log.info("operation=openai.client OpenAI client enabled model={}", properties.getChatModel());
-        return OpenAIOkHttpClient.builder().apiKey(key.trim()).build();
+        String projectId = properties.getProjectId();
+        if (projectId == null || projectId.isBlank()) {
+            projectId = environment.getProperty("OPENAI_PROJECT_ID");
+        }
+        var builder = OpenAIOkHttpClient.builder().apiKey(key.trim());
+        if (projectId != null && !projectId.isBlank()) {
+            builder.project(projectId.trim());
+        }
+        log.info("operation=openai.client OpenAI client enabled model={} projectSet={}",
+                properties.getChatModel(), projectId != null && !projectId.isBlank());
+        return builder.build();
     }
 }
