@@ -14,8 +14,12 @@ public class CodeRemediationLlmConfiguration {
     private static final Logger log = LoggerFactory.getLogger(CodeRemediationLlmConfiguration.class);
 
     @Bean
-    public CodeRemediationLlm codeRemediationLlm(AiProperties properties, ObjectProvider<OpenAIClient> clients) {
-        if (properties.getApiKey() == null || properties.getApiKey().isBlank()) {
+    public CodeRemediationLlm codeRemediationLlm(
+            AiProperties properties,
+            ObjectProvider<OpenAIClient> clients,
+            org.springframework.core.env.Environment environment) {
+        String key = firstNonBlank(properties.getApiKey(), environment.getProperty("OPENAI_API_KEY"));
+        if (key == null || key.isBlank()) {
             log.info("operation=code-remediation.llm mode=DEMO_MODE reason=OPENAI_API_KEY_empty");
             return new DemoCodeRemediationLlm();
         }
@@ -26,5 +30,17 @@ public class CodeRemediationLlmConfiguration {
         }
         log.info("operation=code-remediation.llm mode=LLM_POWERED model={}", properties.getChatModel());
         return new OpenAiCodeRemediationLlm(client, properties);
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return null;
     }
 }

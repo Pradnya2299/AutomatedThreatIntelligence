@@ -13,11 +13,15 @@ public class OpenAiClientConfig {
     private static final Logger log = LoggerFactory.getLogger(OpenAiClientConfig.class);
 
     @Bean
-    public OpenAIClient openAIClient(AiProperties properties) {
-        if (properties.getApiKey() == null || properties.getApiKey().isBlank()) {
+    public OpenAIClient openAIClient(AiProperties properties, org.springframework.core.env.Environment environment) {
+        String key = properties.getApiKey();
+        if (key == null || key.isBlank()) {
+            key = environment.getProperty("OPENAI_API_KEY");
+        }
+        if (key == null || key.isBlank()) {
             return null;
         }
         log.info("operation=openai.client OpenAI client enabled model={}", properties.getChatModel());
-        return OpenAIOkHttpClient.builder().apiKey(properties.getApiKey()).build();
+        return OpenAIOkHttpClient.builder().apiKey(key.trim()).build();
     }
 }

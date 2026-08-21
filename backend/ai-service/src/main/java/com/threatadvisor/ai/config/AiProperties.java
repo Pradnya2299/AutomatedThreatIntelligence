@@ -36,7 +36,7 @@ public class AiProperties {
     }
 
     public String getApiKey() {
-        return apiKey;
+        return apiKey == null ? "" : apiKey.trim();
     }
 
     public void setApiKey(String apiKey) {
