@@ -26,11 +26,17 @@ public class OpenAiEmbeddingService implements EmbeddingService {
 
     @Override
     public String embed(String text) {
-        CreateEmbeddingResponse response = client.embeddings().create(
-                EmbeddingCreateParams.builder()
-                        .model(properties.getEmbeddingModel())
-                        .input(text == null ? "" : text)
-                        .build());
+        CreateEmbeddingResponse response;
+        try {
+            response = client.embeddings().create(
+                    EmbeddingCreateParams.builder()
+                            .model(properties.getEmbeddingModel())
+                            .input(text == null ? "" : text)
+                            .build());
+        } catch (RuntimeException ex) {
+            throw new IllegalStateException(
+                    "OpenAI embeddings failed model=" + properties.getEmbeddingModel(), ex);
+        }
         List<Float> values = response.data().getFirst().embedding();
         StringBuilder literal = new StringBuilder(values.size() * 8);
         literal.append('[');
