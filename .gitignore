@@ -1,0 +1,55 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Java / Maven
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/
+*.swp
+*.swo
+
+# Node / frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.npm/
+frontend/security-dashboard/playwright-report/
+frontend/security-dashboard/test-results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+coverage/
+.nyc_output/
+*.exec
+
+# Docker volumes (if created locally)
+infrastructure/docker/data/
+data/
+
+# Cursor
+.cursor/

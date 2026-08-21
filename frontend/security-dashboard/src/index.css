@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #070b14;
+  --color-panel: #0e1626;
+  --color-border: #1e2d45;
+  --color-accent: #3ee0c5;
+  --color-danger: #ff5c7a;
+  --color-warn: #f5b942;
+  --color-ok: #3ee0c5;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: #d7e3f4;
+  font-family: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+}

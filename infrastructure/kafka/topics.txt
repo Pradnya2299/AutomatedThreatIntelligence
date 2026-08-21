@@ -1,0 +1,25 @@
+# Topic catalog for local development.
+# Topics are created by infrastructure/kafka/create-topics.sh (Compose kafka-init).
+
+cve.raw
+cve.normalized
+cve.enriched
+asset.updated
+finding.created
+risk.calculated
+remediation.requested
+remediation.generated
+notification.requested
+remediation.approved
+remediation.completed
+
+# Dead-letter topics
+cve.raw.dlq
+cve.normalized.dlq
+cve.enriched.dlq
+finding.created.dlq
+risk.calculated.dlq
+remediation.requested.dlq
+remediation.generated.dlq
+notification.requested.dlq
+remediation.approved.dlq
